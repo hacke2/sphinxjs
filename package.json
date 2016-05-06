@@ -13,7 +13,7 @@
     "gulp-filter": "4.0.0",
     "gulp-notify": "2.2.0",
     "gulp-plumber": "1.1.0",
-    "gulp-postcss": "6.1.0",
+    "gulp-postcss": "6.1.1",
     "gulp-rename": "1.2.2",
     "gulp-sass": "2.3.1",
     "gulp-template": "4.0.0",
@@ -21,10 +21,10 @@
     "gulp-util": "3.0.7",
     "liftoff": "2.2.1",
     "merge-stream": "1.0.0",
-    "object-assign": "4.0.1",
+    "object-assign": "4.1.0",
     "pretty-hrtime": "1.0.2",
     "through2": "2.0.1",
-    "yargs": "4.6.0"
+    "yargs": "4.7.0"
   },
   "repository": {
     "type": "git",
