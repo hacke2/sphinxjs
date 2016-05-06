@@ -45,12 +45,12 @@ function resolve(filename, dir, cwd) {
 
         info = util.uri(file, dir, cwd);
 
-        if (util.isFile(info.rest)) {
+        if (info.exists) {
 
-            contents = fs.readFileSync(info.rest);
+            contents = fs.readFileSync(info.realpath);
 
             found = {
-                path: info.rest,
+                path: info.realpath,
                 dirname: info.dirname,
                 contents: contents.toString()
             };

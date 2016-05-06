@@ -47,7 +47,7 @@ function embed(obj, stream, cb) {
             switch (type) {
                 case 'embed':
                     info = util.uri(url, dirname, cwd);
-                    f = getFile(info.rest);
+                    f = getFile(info.release);
 
                     if (f) {
                         if (!f.piped) {
@@ -64,14 +64,14 @@ function embed(obj, stream, cb) {
                         }
                     } else {
                         ret = url;
-                        message = 'unable to embed file [' + info.rest + '] in [' + file.path + ']';
+                        message = 'unable to embed file [' + info.release + '] in [' + file.path + ']';
                     }
                     break;
                 case 'uri':
                     info = util.uri(url, dirname, cwd);
 
                     if (info.url && info.exists) {
-                        f = getFile(info.rest);
+                        f = getFile(info.release);
                         if (f) {
                             if (!f.piped) {
                                 embed(f, stream, cb);
@@ -79,7 +79,7 @@ function embed(obj, stream, cb) {
 
                             ret = info.quote + info.url + info.quote;
                         } else {
-                            message = 'unable to locate file [' + info.rest + '] in [' + file.path + ']';
+                            message = 'unable to locate file [' + info.release + '] in [' + file.path + ']';
                             ret = url;
                         }
                     } else {
@@ -91,7 +91,7 @@ function embed(obj, stream, cb) {
                     info = util.uri(url, dirname, cwd);
 
                     if (info.id && info.exists) {
-                        f = getFile(info.rest);
+                        f = getFile(info.release);
                         if (f) {
                             if (!f.piped) {
                                 embed(f, stream, cb);
@@ -99,7 +99,7 @@ function embed(obj, stream, cb) {
 
                             ret = info.quote + info.id + info.quote;
                         } else {
-                            message = 'unable to locate file [' + info.rest + '] in [' + file.path + ']';
+                            message = 'unable to locate file [' + info.release + '] in [' + file.path + ']';
                             ret = url;
                         }
                     } else {

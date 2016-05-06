@@ -72,6 +72,24 @@ MIME_MAP[ext.jpeg] = 'image/jpeg';
 MIME_MAP[ext.jpg] = 'image/jpg';
 MIME_MAP[ext.webp] = 'image/webp';
 
+var EXT_MAP = {};
+
+EXT_MAP[ext.less] = ext.css;
+EXT_MAP[ext.sass] = ext.css;
+EXT_MAP[ext.scss] = ext.css;
+
+_.escapeReg = function (str) {
+    return str.replace(/[\.\\\+\*\?\[\^\]\$\(\){}=!<>\|:\/]/g, '\\$&');
+};
+
+_.getReleaseExt = function (ext) {
+    var rExt;
+
+    rExt = EXT_MAP[ext];
+
+    return rExt || ext;
+};
+
 _.exists = fs.existsSync || path.existsSync;
 
 _.isFile = function (filepath) {
@@ -157,7 +175,7 @@ _.query = function (str) {
 
     return {
         origin: str,
-        rest: rest,
+        realpath: rest,
         hash: hash,
         query: query
     };
@@ -167,7 +185,7 @@ _.query = function (str) {
 _.stringQuote = function (str, quotes) {
     var info = {
         origin: str,
-        rest: str = str.trim(),
+        realpath: str = str.trim(),
         quote: ''
     };
     var strLen, i, c;
@@ -179,7 +197,7 @@ _.stringQuote = function (str, quotes) {
             c = quotes[i];
             if (str[0] === c && str[strLen] === c) {
                 info.quote = c;
-                info.rest = str.substring(1, strLen);
+                info.realpath = str.substring(1, strLen);
                 break;
             }
         }
@@ -188,16 +206,22 @@ _.stringQuote = function (str, quotes) {
     return info;
 };
 
+/*
+ * realpath 文件物理地址
+ * release 文件发布后地址
+ */
+// todo 对于 http 开头的文件处理
 _.uri = function (filepath, dirname, cwd) {
     var info = _.stringQuote(filepath);
-    var qInfo = _.query(info.rest);
+    var qInfo = _.query(info.realpath);
+    var reg;
 
     info.query = qInfo.query;
     info.hash = qInfo.hash;
-    info.rest = qInfo.rest;
+    info.realpath = qInfo.realpath;
 
-    if (info.rest) {
-        filepath = info.rest;
+    if (info.realpath) {
+        filepath = info.realpath;
         if (filepath.indexOf(':') === -1) {
             // 绝对路径
             if (filepath[0] === '/') {
@@ -210,20 +234,29 @@ _.uri = function (filepath, dirname, cwd) {
             // filepath = filepath.replace(/[\/\\]+/g, '/').replace(/\\/g, '/');
             filepath = filepath.replace(/[\/\\]+/g, '/');
             filepath = path.normalize(filepath);
+
             if (filepath !== '/') {
                 filepath = filepath.replace(/\/$/, '');
             }
 
-            info.rest = filepath;
-            if (info.rest.indexOf(cwd) === 0) {
-                info.url = info.rest.substring(cwd.length);
+            info.realpath = filepath;
+            // 判断文件是否存在
+            info.exists = _.exists(info.realpath);
+
+            // extname
+            info.extname = _.extname(info.realpath);
+            info.rExtname = _.getReleaseExt(info.extname);
+
+            // 文件发布后地址
+            reg = new RegExp(_.escapeReg(info.extname) + '$|' + _.escapeReg(info.rExtname) + '$', 'i');
+            info.release = info.realpath.replace(reg, info.rExtname);
+
+            if (info.release.indexOf(cwd) === 0) {
+                info.url = info.release.substring(cwd.length);
                 info.id = info.url.replace(/^\//, '');
             }
-            // info.url = _.relative(cwd, info.rest);
-            info.extname = _.extname(info.rest);
-            info.dirname = _.dirname(info.rest);
-            info.basename = _.basename(info.rest);
-            info.exists = _.exists(info.rest);
+            info.dirname = _.dirname(info.release);
+            info.basename = _.basename(info.release);
         }
     }
 
