@@ -3,8 +3,6 @@ var through = require('through2');
 var alpaca = require('alpaca-sm');
 var gutil = require('gulp-util');
 var util = require('./util.js');
-var pth = require('path');
-var fs = require('fs');
 var list = {};
 
 function m2c(file, stream, config, cb) {
@@ -43,7 +41,9 @@ function m2c(file, stream, config, cb) {
     }
     stream.push(file);
 }
-
+alpaca.log.on('warning', function (msg) {
+    gutil.log('gulp-m2c: ' + msg);
+});
 function processor(stream, config, cb) {
 
     try {
@@ -52,7 +52,7 @@ function processor(stream, config, cb) {
             m2c(list[pth], stream, config, cb);
         }
     } catch (e) {
-        cb(new gutil.PluginError('m2c', e.message));
+        cb(new gutil.PluginError('m2c', e.stack || e.error.stack));
         return;
     }
     list = {};
@@ -69,7 +69,7 @@ module.exports = function (config) {
             return cb();
         }
         extname = util.extname(file.path);
-        if (!util.isCss(extname) && !util.isJs(extname) && !util.isHtml(extname)) {
+        if (!util.isJs(extname) && !util.isHtml(extname)) {
             this.push(file);
             return cb();
         }
