@@ -7,33 +7,12 @@ var pth = require('path');
 var fs = require('fs');
 var list = {};
 
-function dealPath(path) {
-    var extname = pth.extname(path),
-        dirname,
-        basename;
-
-    if (extname !== '.css') {
-        return path;
-    } else {
-        dirname = pth.dirname(path);
-        basename = pth.basename(path, extname);
-
-        for (var i = 0, list = ['.css', '.scss', '.sass'], len = list.length; i < len; i++) {
-            path = dirname + '/' + basename + list[i];
-
-            if (fs.existsSync(path)) {
-                return path;
-            }
-        }
-
-    }
-}
-
 function m2c(file, stream, config, cb) {
     var path, result;
 
     if (!file.isDirectory()) {
-        path = dealPath(file.path);
+
+        path = file.path;
         result = alpaca.processor({
             src: path,
             contentProcessor: function (aFile) {
@@ -50,7 +29,7 @@ function m2c(file, stream, config, cb) {
                 }
 
             },
-            isJudgeFileExist: 1,
+            isJudgeFileExist: 0,
             config: config || {
                 fileBasedRoot: false,
                 ns: 'sm'
