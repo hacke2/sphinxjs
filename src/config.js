@@ -4,12 +4,7 @@ var gutil = require('gulp-util');
 var CONFIG = {
     include: null,
     dest: 'dist',
-    task: '',
-    exts: {
-        smtpl: {
-            release: false
-        }
-    }
+    task: ''
 };
 
 function merge(source, target) {

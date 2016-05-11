@@ -114,15 +114,11 @@ var prototype = {
         return stream;
     },
     _isRelease: function (extname) {
-        var handler, exts;
+        var handler;
 
         if (this.exts.indexOf(extname) >= 0) {
-            exts = config.get('exts');
-            if (exts) {
-                exts = exts[extname];
-            }
 
-            handler = objectAssign(Base.handler[extname] || {}, this.handler[extname] || {}, exts || {});
+            handler = objectAssign({}, Base.handler[extname] || {}, this.handler[extname] || {});
             if (!('release' in handler)) {
                 return true;
             } else {
