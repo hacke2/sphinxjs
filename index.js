@@ -87,7 +87,7 @@ function execute(argv, env) {
         if (argv.d && typeof argv.d == 'string') {
             dest = argv.d;
         } else {
-            dest = config.get('dest') || 'dist';
+            dest = config.get('dest');
         }
         return new taskPlugin.Task(include, {
             argv: argv,

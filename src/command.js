@@ -14,7 +14,6 @@ argvOptions = {
         alias: 'dest',
         demand: false,
         type: 'string',
-        'default': 'dist',
         describe: chalk.gray('release output destination')
     },
     o: {
