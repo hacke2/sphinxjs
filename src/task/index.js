@@ -46,6 +46,10 @@ Task.prototype.handler = {
                 }));
         },
         release: false
+    },
+
+    tpl: {
+        release: false
     }
 
 };
