@@ -38,7 +38,7 @@ Task.prototype.handler = {
         }
     },
 
-    tpl: {
+    tmpl: {
         compile: function (stream) {
             return stream
                 .pipe(tmpl.precompile({
