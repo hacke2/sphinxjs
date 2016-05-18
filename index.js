@@ -9,6 +9,7 @@ var buildGlob = require('./src/glob.js');
 var config = require('./src/config.js');
 var Base = require('./src/task/base.js');
 var util = require('./src/util.js');
+var ewm = require('./src/ewm.js');
 var sphinx = {
     config: config,
     Base: Base,
@@ -101,8 +102,10 @@ function execute(argv, env) {
 
     gulp.task('browserSync', function (cb) {
         browserSync.init({
+            open: 'external',
             server: argv.d || config.get('dest')
         }, function () {
+            ewm(browserSync);
             watch(cwd);
             cb();
         });
