@@ -19,8 +19,6 @@ var ext = require('../ext');
 
 var util = require('util');
 var Event = require('events').EventEmitter;
-var config = require('../config.js');
-
 var objectAssign = require('object-assign');
 
 function Base(path, conf) {

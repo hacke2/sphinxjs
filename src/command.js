@@ -39,7 +39,8 @@ argvOptions = {
     },
     cwd: {
         type: 'string',
-        'default': process.cwd()
+        'default': process.cwd(),
+        describe: chalk.gray('set project root')
     }
 };
 commander = {

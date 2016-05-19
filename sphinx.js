@@ -7,7 +7,7 @@ var gulp = require('gulp');
 var chalk = gutil.colors;
 var prettyTime = require('pretty-hrtime');
 var tasks = config.get('_');
-
+var yargs = require('yargs');
 var cli = new Liftoff({
     name: 'sphinx',
     configName: 'sphinx-conf',
@@ -17,10 +17,15 @@ var cli = new Liftoff({
     }
 });
 
-cli.launch({
-    cwd: config.get('cwd'),
-    configPath: config.get('sphinxconf')
-}, invoke);
+tasks.splice(1);
+if (isCommand(tasks)) {
+    cli.launch({
+        cwd: config.get('cwd'),
+        configPath: config.get('sphinxconf')
+    }, invoke);
+} else {
+    yargs.showHelp();
+}
 
 function invoke(env) {
     var version = [];
@@ -83,6 +88,19 @@ function invoke(env) {
         } catch (e) {
         };
     });
+
+}
+
+function isCommand(tasks) {
+    var commands = yargs.getCommandInstance().getCommands();
+
+    if (tasks.length > 0) {
+        if (!commands.length || commands.length && commands.indexOf(tasks[0]) >= 0) {
+            return true;
+        }
+    }
+
+    return false;
 
 }
 
