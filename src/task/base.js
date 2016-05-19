@@ -19,14 +19,13 @@ var ext = require('../ext');
 
 var util = require('util');
 var Event = require('events').EventEmitter;
-
 var config = require('../config.js');
 
 var objectAssign = require('object-assign');
 
 function Base(path, conf) {
     this._path = path;
-    this._optimize = conf.argv.o;
+    this._optimize = conf.optimize;
     this._cwd = conf.cwd;
     this._dest = conf.dest;
     Event.call(this);
@@ -83,8 +82,7 @@ var prototype = {
             if (Base.handler) {
                 Array.prototype.concat(
                     Object.keys(Base.handler),
-                    Object.keys(this.handler),
-                    Object.keys(config.get('exts') || {})
+                    Object.keys(this.handler)
                 )
                 .forEach(function (ext) {
                     if (this._exts.indexOf(ext) === -1) {

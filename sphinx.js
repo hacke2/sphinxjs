@@ -1,12 +1,12 @@
 'use strict';
-var argv = require('./src/cli.js');
 var pkg = require('./package.json');
+var config = require('./src/config.js');
 var Liftoff = require('liftoff');
 var gutil = require('gulp-util');
 var gulp = require('gulp');
 var chalk = gutil.colors;
 var prettyTime = require('pretty-hrtime');
-var tasks = argv._;
+var tasks = config.get('_');
 
 var cli = new Liftoff({
     name: 'sphinx',
@@ -18,14 +18,14 @@ var cli = new Liftoff({
 });
 
 cli.launch({
-    cwd: argv.cwd || process.cwd(),
-    configPath: argv.sphinxconf
+    cwd: config.get('cwd'),
+    configPath: config.get('sphinxconf')
 }, invoke);
 
 function invoke(env) {
     var version = [];
 
-    if (argv.version && tasks.length === 0) {
+    if (config.get('version') && tasks.length === 0) {
         console.log('\n\r  v' + pkg.version + '\n');
         version.push('\t┏┛ ┻━━━━━┛ ┻┓');
         version.push('\t┃           ┃');
@@ -49,7 +49,7 @@ function invoke(env) {
         tasks = ['release'];
     }
     // 加载配置文件
-    require('./index')(argv, env);
+    require('./index')(env);
 
     gulp.on('start', function (e) {
         gutil.log('Starting', '\'' + chalk.cyan(e.name) + '\'...');

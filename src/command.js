@@ -5,7 +5,7 @@ var yargs = require('yargs'),
 
 argvOptions = {
     M: {
-        alias: 'm2c',
+        alias: 'module',
         demand: false,
         type: 'boolean',
         describe: chalk.gray('opening modular')
@@ -36,6 +36,10 @@ argvOptions = {
         alias: 'glob',
         type: 'array',
         describe: chalk.gray('fiter release file')
+    },
+    cwd: {
+        type: 'string',
+        'default': process.cwd()
     }
 };
 commander = {

@@ -1,95 +1,58 @@
 'use strict';
 
 var gutil = require('gulp-util');
-var CONFIG = {
+var Immutable = require('immutable');
+var argv = Immutable.Map(require('./cli.js'));
+var defaultConfig = Immutable.Map({
     include: null,
     dest: 'dist',
     task: ''
-};
+});
 
-function merge(source, target) {
-    if (source && target && typeof source === 'object' && typeof target === 'object') {
-        for (var key in target) {
-            if (target.hasOwnProperty(key)) {
-                source[key] = merge(source[key], target[key]);
-            }
-        }
-    } else {
-        source = target;
-    }
-    return source;
-}
+function Config() {
+    var config = defaultConfig;
 
-function Config(config) {
-    if (Config.instance instanceof Config) {
-        return Config.instance;
-    }
-    this.config = merge(config, CONFIG);
+    return {
+        load: function (path) {
+            var conf;
 
-    Config.instance = this;
-}
+            if (path) {
+                try {
+                    conf = Immutable.Map(require(path));
 
-Config.prototype = {
-    set: function (key, value) {
-        if (typeof value !== 'undefined') {
+                    config = config.mergeDeep(conf);
 
-            key = String(key || '').trim();
-            if (key) {
-                var paths = key.split('.'),
-                    last = paths.pop(),
-                    data = this.config || {};
-
-                paths.forEach(function (key) {
-                    var type = typeof data[key];
-
-                    if (type === 'object') {
-                        data = data[key];
-                    } else if (type === 'undefined') {
-                        data = data[key] = {};
-                    } else {
-
-                        gutil.log('forbidden to set property[' + key + '] of [' + type + '] data');
-
-                    }
-                });
-                data[last] = value;
-            }
-        }
-    },
-    get: function (keyPath) {
-        var keys = keyPath.split('.'),
-            key,
-            config = this.config;
-
-        for (var i = 0, len = keys.length; i < len; i++) {
-            key = keys[i];
-            if (i == len - 1) {
-                return config[key];
-            } else if (key in config) {
-                config = config[key];
+                } catch (e) {
+                    gutil.log('Loading or Parsing the configuration file "' + path + '" is incorrect: ' + e.message);
+                }
             } else {
-                return;
+                gutil.log('missiong config file [sphinx-conf.js] or [sphinx-conf.json]');
             }
-        }
-    },
-    merge: function (config) {
-        this.config = merge(this.config, config);
-    },
-    load: function (path) {
-        var config;
+        },
 
-        if (path) {
-            try {
-                config = require(path);
-                this.merge(config || {});
-            } catch (e) {
-                gutil.log('Loading or Parsing the configuration file "' + path + '" is incorrect: ' + e.message);
+        merge: function (conf, deep) {
+            config = deep ? config.mergeDeep(conf) : config.merge(conf);
+        },
+        get: function (key) {
+            var result;
+
+            result = Array.isArray(key) ?
+                argv.getIn(key) :
+                argv.get(key);
+
+            if (result) {
+                return result;
+            } else {
+                return Array.isArray(key) ?
+                config.getIn(key) :
+                config.get(key);
             }
-        } else {
-            gutil.log('missiong config file [sphinx-conf.js] or [sphinx-conf.json]');
+        },
+        set: function (key, value) {
+            config = Array.isArray(key) ? config.setIn(key, value) : config.set(key, value);
         }
-    }
-};
+    };
+}
 
-module.exports = new Config({});
-module.exports.Config = Config;
+module.exports = Config();
+

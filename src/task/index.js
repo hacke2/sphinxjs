@@ -10,7 +10,7 @@ var objectAssign = require('object-assign');
 
 function Task(obj, conf) {
     Base.apply(this, arguments);
-    if (conf.argv.m2c) {
+    if (config.get('module')) {
         var m2cConf = config.get('m2c') || {ns: 'sm'};
 
         this.on('compiled', function (stream, cb, flag) {

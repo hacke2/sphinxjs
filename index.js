@@ -3,7 +3,6 @@ var gulp = require('gulp');
 var filter = require('gulp-filter');
 var chokidar = require('chokidar');
 var browserSync = require('browser-sync').create();
-var cwd = process.cwd();
 var plugin = require('./src/plugin.js');
 var buildGlob = require('./src/glob.js');
 var config = require('./src/config.js');
@@ -24,14 +23,21 @@ if (!global.sphinx) {
     });
 }
 
-function execute(argv, env) {
-    var taskPlugin;
+function execute(env) {
+    var taskPlugin, aGlobs, dest, task,
+        cwd;
 
     config.load(env.configPath);
-    taskPlugin = plugin.loadTaskPlugin(argv.task || config.get('task'));
-    if (argv.glob && argv.glob.length > 0) {
+    task = config.get('task');
+    cwd = config.get('cwd');
+    taskPlugin = plugin.loadTaskPlugin(task);
+    aGlobs = config.get('glob');
+
+    dest = config.get('dest');
+
+    if (aGlobs && aGlobs.length > 0) {
         config.set('include', [{
-            glob: argv.glob
+            glob: aGlobs
         }]);
     }
 
@@ -41,14 +47,14 @@ function execute(argv, env) {
         include = config.get('include');
         if (!include || !Array.isArray(include) || !include.length || !('glob' in include[0])) {
             config.set('include', [{
-                glob: buildGlob(cwd, argv.d)
+                glob: buildGlob(cwd, dest)
             }]);
         }
         cb();
     });
 
     function watch(root) {
-        var ignored = require('path').join(root, (argv.d || config.get('dest'))),
+        var ignored = require('path').join(root, dest),
             timer;
 
         function listener(type) {
@@ -77,23 +83,16 @@ function execute(argv, env) {
     }
 
     gulp.task('build', function (cb) {
-        var root = cwd,
-            include = config.get('include'),
-            dest;
+        var include = config.get('include');
 
         if (taskPlugin.error) {
             cb(taskPlugin.error);
         }
 
-        if (argv.d && typeof argv.d == 'string') {
-            dest = argv.d;
-        } else {
-            dest = config.get('dest');
-        }
         return new taskPlugin.Task(include, {
-            argv: argv,
-            cwd: root,
-            dest: dest
+            cwd: cwd,
+            dest: dest,
+            optimize: config.get('optimize')
         })
         .stream
         .pipe(filter('**/*.css'))
@@ -103,7 +102,7 @@ function execute(argv, env) {
     gulp.task('browserSync', function (cb) {
         browserSync.init({
             open: 'external',
-            server: argv.d || config.get('dest')
+            server: dest
         }, function () {
             ewm(browserSync);
             watch(cwd);
