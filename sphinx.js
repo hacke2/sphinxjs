@@ -98,8 +98,9 @@ function isCommand(tasks) {
         if (!commands.length || commands.length && commands.indexOf(tasks[0]) >= 0) {
             return true;
         }
+    } else if (yargs.argv.version || yargs.argv.help) {
+        return true;
     }
-
     return false;
 
 }
