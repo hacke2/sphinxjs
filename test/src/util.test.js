@@ -40,4 +40,40 @@ describe('sphinx util.js', function () {
             done();
         });
     });
+    describe('isImage', function () {
+        it('给定的扩展名是否图片', function (done) {
+            expect(util.isImage('.png')).to.be.ok;
+            expect(util.isImage('.js')).to.be.not.ok;
+            done();
+        });
+    });
+    describe('isJs', function () {
+        it('给定的扩展名是否JS', function (done) {
+            expect(util.isJs('.js')).to.be.ok;
+            expect(util.isJs('.png')).to.be.not.ok;
+            done();
+        });
+    });
+    describe('isCss', function () {
+        it('给定的扩展名是否样式文件', function (done) {
+            expect(util.isCss('.scss')).to.be.ok;
+            expect(util.isCss('.sass')).to.be.ok;
+            expect(util.isCss('.css')).to.be.ok;
+            expect(util.isCss('.js')).to.be.not.ok;
+            done();
+        });
+    });
+    describe('isHtml', function () {
+        it('给定的扩展名是否HTML', function (done) {
+            expect(util.isHtml('.html')).to.be.ok;
+            expect(util.isHtml('.js')).to.be.not.ok;
+            done();
+        });
+    });
+    describe('basename', function () {
+        it('给定的扩展名是否HTML', function (done) {
+            expect(util.basename('test/xx.html')).to.be.equal('xx.html');
+            done();
+        });
+    });
 });
