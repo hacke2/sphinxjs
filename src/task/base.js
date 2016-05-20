@@ -96,16 +96,17 @@ var prototype = {
     src: function (stream) {
 
         if (this._path.length > 0) {
-            this._path.forEach(function (path) {
-                var opts = {};
+            stream.add(gulp.src(this._path));
+            // this._path.forEach(function (path) {
+            //     var opts = {};
 
-                if (path.base) {
-                    opts['base'] = path.base;
-                }
-                stream.add(
-                    gulp.src(path.glob, opts)
-                );
-            });
+            //     if (path.base) {
+            //         opts['base'] = path.base;
+            //     }
+            //     stream.add(
+            //         gulp.src(path.glob, opts)
+            //     );
+            // });
         }
         return stream;
     },

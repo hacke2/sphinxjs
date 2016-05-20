@@ -24,32 +24,25 @@ if (!global.sphinx) {
 }
 
 function execute(env) {
-    var taskPlugin, aGlobs, dest, task,
+    var taskPlugin, dest, task,
         cwd;
 
-    config.load(env.configPath);
-    task = config.get('task');
-    cwd = config.get('cwd');
-    taskPlugin = plugin.loadTaskPlugin(task);
-    aGlobs = config.get('glob');
-
-    dest = config.get('dest');
-
-    if (aGlobs && aGlobs.length > 0) {
-        config.set('include', [{
-            glob: aGlobs
-        }]);
-    }
-
     gulp.task('config', function (cb) {
-        var include;
+        var tk, result;
 
-        include = config.get('include');
-        if (!include || !Array.isArray(include) || !include.length || !('glob' in include[0])) {
-            config.set('include', [{
-                glob: buildGlob(cwd, dest)
-            }]);
+        result = config.load(env.configPath);
+        tk = config.get('task');
+        cwd = config.get('cwd');
+        dest = config.get('dest');
+        if (tk != task) {
+            taskPlugin = plugin.loadTaskPlugin(tk);
+            task = tk;
         }
+
+        if (!config.getArgv('glob') && !result) {
+            config.set('glob', buildGlob(cwd, dest));
+        }
+
         cb();
     });
 
@@ -83,7 +76,7 @@ function execute(env) {
     }
 
     gulp.task('build', function (cb) {
-        var include = config.get('include');
+        var include = config.get('glob');
 
         if (taskPlugin.error) {
             cb(taskPlugin.error);

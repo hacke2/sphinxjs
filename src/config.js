@@ -4,7 +4,7 @@ var gutil = require('gulp-util');
 var Immutable = require('immutable');
 var argv = Immutable.Map(require('./cli.js'));
 var defaultConfig = Immutable.Map({
-    include: null,
+    glob: ['**.**'],
     dest: 'dist',
     task: ''
 });
@@ -22,11 +22,16 @@ function Config() {
 
                     config = config.mergeDeep(conf);
 
+                    return true;
+
                 } catch (e) {
                     gutil.log('Loading or Parsing the configuration file "' + path + '" is incorrect: ' + e.message);
+                    return false;
                 }
             } else {
+
                 gutil.log('missiong config file [sphinx-conf.js] or [sphinx-conf.json]');
+                return false;
             }
         },
 
@@ -36,17 +41,23 @@ function Config() {
         get: function (key) {
             var result;
 
-            result = Array.isArray(key) ?
-                argv.getIn(key) :
-                argv.get(key);
+            result = this.getArgv(key);
 
             if (result) {
                 return result;
             } else {
-                return Array.isArray(key) ?
+                return this.getConfig(key);
+            }
+        },
+        getArgv: function (key) {
+            return Array.isArray(key) ?
+                argv.getIn(key) :
+                argv.get(key);
+        },
+        getConfig: function (key) {
+            return Array.isArray(key) ?
                 config.getIn(key) :
                 config.get(key);
-            }
         },
         set: function (key, value) {
             config = Array.isArray(key) ? config.setIn(key, value) : config.set(key, value);
