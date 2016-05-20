@@ -257,12 +257,7 @@ Base.handler = {
         optimize: function (stream) {
             // css 文件压缩 todo 设置参数
             return stream
-                .pipe(minifyCss({debug: true}, function (details) {
-                    console.log(details.name + ': ' + details.stats.originalSize);
-                    console.log(details.name + ': ' + details.stats.minifiedSize);
-                    console.log(details.name + ': ' + details.stats.timeSpent);
-                    console.log(details.name + ': ' + details.stats.efficiency);
-                }));
+                .pipe(minifyCss());
         }
     },
 
