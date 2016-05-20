@@ -44,11 +44,6 @@ var CSS_EXTS = [
     ext.sass
 ];
 
-var TPL_EXTS = [
-    ext.tmpl,
-    ext.tpl
-];
-
 var HTML_EXTS = [
     ext.html
 ];
@@ -126,10 +121,6 @@ _.isEs = function (extname) {
 
 _.isJsx = function (extname) {
     return JSX_EXTS.indexOf(extname) > -1;
-};
-
-_.isTpl = function (extname) {
-    return TPL_EXTS.indexOf(extname) > -1;
 };
 
 _.dirname = function (filepath) {

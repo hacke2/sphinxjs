@@ -109,6 +109,7 @@ var prototype = {
         }
         return stream;
     },
+
     _isRelease: function (extname) {
         var handler;
 
@@ -141,8 +142,8 @@ var prototype = {
             var extname = _.extname(file.path).replace('.', '');
 
             return this._isRelease(extname);
-
         }).bind(this)));
+
         if (flag) {
             filterStream = filter(function (file) {
                 var path = file.path,
@@ -296,24 +297,8 @@ Base.handler = {
         optimize: function (stream) {
             return stream;
         }
-    },
-
-    tpl: {
-
-        filter: function (path) {
-            var extname = _.extname(path);
-
-            return _.isTpl(extname);
-        },
-
-        compile: function (stream) {
-            return stream;
-        },
-
-        optimize: function (stream) {
-            return stream;
-        }
     }
+
 };
 
 Base.type = Object.keys(Base.handler);

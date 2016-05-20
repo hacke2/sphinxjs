@@ -63,7 +63,6 @@ function embed(obj, stream, cb) {
                             ret = ret.toString();
                         }
                     } else {
-                        ret = url;
                         message = 'unable to embed file [' + info.release + '] in [' + file.path + ']';
                     }
                     break;

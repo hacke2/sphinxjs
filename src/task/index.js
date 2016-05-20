@@ -6,6 +6,8 @@ var util = require('util');
 var Base = require('./base');
 var m2c = require('../m2c.js');
 var config = require('../config.js');
+var ext = require('../ext.js');
+var _ = require('../util.js');
 var objectAssign = require('object-assign');
 
 function Task(obj, conf) {
@@ -39,16 +41,42 @@ Task.prototype.handler = {
     },
 
     tmpl: {
+        filter: function (path) {
+            var extname = _.extname(path);
+
+            return extname === ext.tmpl;
+        },
+
         compile: function (stream) {
             return stream
                 .pipe(tmpl.precompile({
                     variable: 'obj'
                 }));
         },
+
+        optimize: function (stream) {
+            return stream;
+        },
+
         release: false
     },
 
     tpl: {
+
+        filter: function (path) {
+            var extname = _.extname(path);
+
+            return extname === ext.tpl;
+        },
+
+        compile: function (stream) {
+            return stream;
+        },
+
+        optimize: function (stream) {
+            return stream;
+        },
+
         release: false
     }
 
