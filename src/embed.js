@@ -55,9 +55,9 @@ function embed(obj, stream, cb) {
                         }
 
                         ret = f.file.contents;
-                        if (!util.isText(info.extname)) {
+                        if (!util.isText(info.rExtname)) {
                             // 非文本文件 buffer
-                            ret = info.quote + util.base64(ret, info.extname) + info.quote;
+                            ret = info.quote + util.base64(ret, info.rExtname) + info.quote;
                         } else {
                             // 文本文件必须 toString()
                             ret = ret.toString();
@@ -68,40 +68,37 @@ function embed(obj, stream, cb) {
                     break;
                 case 'uri':
                     info = util.uri(url, dirname, cwd);
+                    f = getFile(info.release);
 
-                    if (info.url && info.exists) {
-                        f = getFile(info.release);
-                        if (f) {
-                            if (!f.piped) {
-                                embed(f, stream, cb);
-                            }
-
-                            ret = info.quote + info.url + info.quote;
-                        } else {
-                            message = 'unable to locate file [' + info.release + '] in [' + file.path + ']';
-                            ret = url;
+                    // stream 中存在此文件
+                    if (info.url && f) {
+                        if (!f.piped) {
+                            embed(f, stream, cb);
                         }
+
+                        ret = info.quote + info.url + info.quote;
                     } else {
+                        if (info.exists) {
+                            message = 'unable to locate file [' + info.release + '] in [' + file.path + ']';
+                        }
                         ret = url;
                     }
 
                     break;
                 case 'require':
                     info = util.uri(url, dirname, cwd);
+                    f = getFile(info.release);
 
-                    if (info.id && info.exists) {
-                        f = getFile(info.release);
-                        if (f) {
-                            if (!f.piped) {
-                                embed(f, stream, cb);
-                            }
-
-                            ret = info.quote + info.id + info.quote;
-                        } else {
-                            message = 'unable to locate file [' + info.release + '] in [' + file.path + ']';
-                            ret = url;
+                    if (info.id && f) {
+                        if (!f.piped) {
+                            embed(f, stream, cb);
                         }
+
+                        ret = info.quote + info.id + info.quote;
                     } else {
+                        if (info.exists) {
+                            message = 'unable to locate file [' + info.release + '] in [' + file.path + ']';
+                        }
                         ret = url;
                     }
 

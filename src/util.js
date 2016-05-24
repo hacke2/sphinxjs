@@ -231,7 +231,7 @@ _.uri = function (filepath, dirname, cwd) {
             }
 
             info.realpath = filepath;
-            // 判断文件是否存在
+            // 判断物理文件是否存在
             info.exists = _.exists(info.realpath);
 
             // extname
