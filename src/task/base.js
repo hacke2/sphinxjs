@@ -244,7 +244,13 @@ Base.handler = {
         optimize: function (stream) {
             // css 文件压缩 todo 设置参数
             return stream
-                .pipe(minifyCss());
+                .pipe(minifyCss({
+                    advanced: false,
+                    aggressiveMerging: true,
+                    processImport: false, // 禁止import
+                    mediaMerging: true, // 合并@media规则
+                    roundingPrecision: -1 //禁止四舍五入
+                }))
         }
     },
 
