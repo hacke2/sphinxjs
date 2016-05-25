@@ -28,19 +28,24 @@ argvOptions = {
         type: 'string',
         describe: chalk.gray('mount plugin task')
     },
-    sphinxconf: {
-        type: 'string',
-        describe: chalk.gray('Manually set path of sphinxconf')
-    },
+
     g: {
         alias: 'glob',
         type: 'array',
         describe: chalk.gray('fiter release file')
     },
+    sphinxconf: {
+        type: 'string',
+        describe: chalk.gray('Manually set path of sphinxconf')
+    },
     cwd: {
         type: 'string',
         'default': process.cwd(),
         describe: chalk.gray('set project root')
+    },
+    email: {
+        type: 'boolean',
+        describe: chalk.gray('send error to your set email')
     }
 };
 commander = {

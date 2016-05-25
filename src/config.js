@@ -2,11 +2,26 @@
 
 var gutil = require('gulp-util');
 var Immutable = require('immutable');
-var argv = Immutable.Map(require('./cli.js'));
-var defaultConfig = Immutable.Map({
-    glob: ['**.**'],
+var argv = Immutable.fromJS(require('./cli.js'));
+var defaultConfig = Immutable.fromJS({
+    glob: null,
     dest: 'dist',
-    task: ''
+    task: '',
+    mail: {
+        smtp: {
+            host: 'smtp.qq.com',
+            port: 465,
+            secure: true,
+            auth: {
+                user: 'guomilo@qq.com',
+                pass: 'huffnjiuzeuabhie'
+            }
+        },
+        option: {
+            from: 'guomilo@qq.com',
+            to: 'mingli.guoml@alibaba-inc.com'
+        }
+    }
 });
 
 function Config() {
@@ -18,7 +33,7 @@ function Config() {
 
             if (path) {
                 try {
-                    conf = Immutable.Map(require(path));
+                    conf = Immutable.fromJS(require(path));
 
                     config = config.mergeDeep(conf);
 
@@ -35,29 +50,40 @@ function Config() {
             }
         },
 
-        merge: function (conf, deep) {
-            config = deep ? config.mergeDeep(conf) : config.merge(conf);
+        merge: function (conf) {
+            config = config.mergeDeep(conf);
         },
         get: function (key) {
             var result;
 
             result = this.getArgv(key);
 
-            if (result) {
-                return result;
-            } else {
-                return this.getConfig(key);
+            if (!result) {
+                result = this.getConfig(key);
             }
+            return result;
+
         },
         getArgv: function (key) {
-            return Array.isArray(key) ?
+            var result = Array.isArray(key) ?
                 argv.getIn(key) :
                 argv.get(key);
+
+            if (result && result.toJS) {
+                return result.toJS();
+            }
+            return result;
+
         },
         getConfig: function (key) {
-            return Array.isArray(key) ?
+            var result = Array.isArray(key) ?
                 config.getIn(key) :
                 config.get(key);
+
+            if (result && result.toJS) {
+                return result.toJS();
+            }
+            return result;
         },
         set: function (key, value) {
             config = Array.isArray(key) ? config.setIn(key, value) : config.set(key, value);

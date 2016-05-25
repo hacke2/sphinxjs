@@ -39,7 +39,7 @@ function execute(env) {
             task = tk;
         }
 
-        if (!config.getArgv('glob') && !result) {
+        if (!config.get('glob')) {
             config.set('glob', buildGlob(cwd, dest));
         }
 

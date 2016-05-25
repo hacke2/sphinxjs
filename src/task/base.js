@@ -20,12 +20,14 @@ var ext = require('../ext');
 var util = require('util');
 var Event = require('events').EventEmitter;
 var objectAssign = require('object-assign');
+var Mail = require('../mail.js');
 
 function Base(path, conf) {
     this._path = path;
     this._optimize = conf.optimize;
     this._cwd = conf.cwd;
     this._dest = conf.dest;
+    this.mail = new Mail();
     Event.call(this);
 }
 
@@ -36,14 +38,18 @@ var prototype = {
      * 返回 stream
      */
     get stream() {
-        var stream = mergeStream();
+        var stream = mergeStream(),
+            mail = this.mail;
 
         // 读取文件
         stream = this.src(stream);
         // 错误处理
         stream = stream
             .pipe(plumber({
-                errorHandler: notify.onError('Error: <%= error.message %>')
+                errorHandler: notify.onError(function (error) {
+                    mail.collectMessage(error.message);
+                    return 'Error:' + error.message;
+                })
             }));
 
         this.emit('beforeCompile', stream, function (stm) {
@@ -129,7 +135,7 @@ var prototype = {
 
     /* flag 是否更改文件名生成 .min 文件 */
     dest: function (stream, flag) {
-        var filterStream;
+        var filterStream, _this = this;
 
         stream = stream
                 .pipe(inline())
@@ -162,7 +168,10 @@ var prototype = {
             stream = stream.pipe(filterStream.restore);
         }
         return stream
-            .pipe(gulp.dest(this._dest));
+            .pipe(gulp.dest(this._dest))
+            .on('finish', function (e) {
+                _this.mail.send('【sphinx release Error】');
+            });
     },
 
     // 对 compile 和 optimize 的封装
