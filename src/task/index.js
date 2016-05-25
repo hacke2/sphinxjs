@@ -56,9 +56,7 @@ Task.prototype.handler = {
 
         optimize: function (stream) {
             return stream;
-        },
-
-        release: false
+        }
     },
 
     tpl: {
@@ -75,9 +73,7 @@ Task.prototype.handler = {
 
         optimize: function (stream) {
             return stream;
-        },
-
-        release: false
+        }
     }
 
 };

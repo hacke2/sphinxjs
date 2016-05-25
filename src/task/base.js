@@ -117,22 +117,6 @@ var prototype = {
         return stream;
     },
 
-    _isRelease: function (extname) {
-        var handler;
-
-        if (this.exts.indexOf(extname) >= 0) {
-
-            handler = objectAssign({}, Base.handler[extname] || {}, this.handler[extname] || {});
-            if (!('release' in handler)) {
-                return true;
-            } else {
-                return handler.release;
-            }
-        } else {
-            return true;
-        }
-    },
-
     /* flag 是否更改文件名生成 .min 文件 */
     dest: function (stream, flag) {
         var filterStream, _this = this;
@@ -144,12 +128,6 @@ var prototype = {
         this.emit('compiled', stream, function (stm) {
             stream = stm;
         }, flag);
-
-        stream = stream.pipe(filter((function (file) {
-            var extname = _.extname(file.path).replace('.', '');
-
-            return this._isRelease(extname);
-        }).bind(this)));
 
         if (flag) {
             filterStream = filter(function (file) {
