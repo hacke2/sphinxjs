@@ -4,15 +4,15 @@ var tmpl = require('gulp-template');
 var postcss = require('gulp-postcss');
 var util = require('util');
 var Base = require('./base');
-var m2c = require('../m2c.js');
-var config = require('../config.js');
+// var m2c = require('../m2c.js');
+// var config = require('../config.js');
 var ext = require('../ext.js');
 var _ = require('../util.js');
-var objectAssign = require('object-assign');
+// var objectAssign = require('object-assign');
 
 function Task(obj, conf) {
     Base.apply(this, arguments);
-    if (config.get('module')) {
+    /* if (config.get('module')) {
         var m2cConf = config.get('m2c') || {ns: 'sm'};
 
         this.on('compiled', function (stream, cb, flag) {
@@ -23,7 +23,7 @@ function Task(obj, conf) {
             stream = stream.pipe(m2c(m2cConf));
             cb(stream);
         });
-    }
+    }*/
 };
 
 util.inherits(Task, Base);
@@ -77,4 +77,7 @@ Task.prototype.handler = {
     }
 
 };
+
+Task.prototype.constructor = Task;
+
 module.exports = Task;

@@ -16,10 +16,22 @@ var _ = require('../util');
 var importer = require('../sass').importer;
 var fixImport = require('../sass').fixImport;
 var ext = require('../ext');
-
-var util = require('util');
-var Event = require('events').EventEmitter;
 var Mail = require('../mail.js');
+
+// 数组去重
+function unique(array) {
+    var r = [];
+
+    for (var i = 0, l = array.length; i < l; i++) {
+        for (var j = i + 1; j < l; j++) {
+            if (array[i] === array[j]) {
+                j = ++i;
+            }
+        }
+        r.push(array[i]);
+    }
+    return r;
+}
 
 function Base(path, conf) {
     this._path = path;
@@ -27,18 +39,14 @@ function Base(path, conf) {
     this._cwd = conf.cwd;
     this._dest = conf.dest;
     this.mail = new Mail();
-    Event.call(this);
 }
 
-util.inherits(Base, Event);
-
-var prototype = {
+Base.prototype = {
     /*
      * 返回 stream
      */
     get stream() {
-        var stream = mergeStream(),
-            mail = this.mail;
+        var stream = mergeStream();
 
         // 读取文件
         stream = this.src(stream);
@@ -46,14 +54,11 @@ var prototype = {
         stream = stream
             .pipe(plumber({
                 errorHandler: notify.onError(function (error) {
-                    mail.collectMessage(error.message);
+                    this.mail.collectMessage(error.message);
                     return 'Error:' + error.message;
-                })
+                }.bind(this))
             }));
 
-        this.emit('beforeCompile', stream, function (stm) {
-            stream = stm;
-        });
         // 编译
         stream = this.compile(stream);
 
@@ -63,6 +68,8 @@ var prototype = {
                 .pipe(copy());
         }
 
+        stream = this.lang(stream);
+        stream = this.postrelease(stream);
         stream = this.dest(stream);
 
         // 优化压缩
@@ -71,63 +78,90 @@ var prototype = {
             stream = stream.pipe(copy.restore());
 
             stream = this.optimize(stream);
-
+            stream = this.lang(stream);
+            stream = this.postrelease(stream);
             stream = this.dest(stream, true);
         }
 
+        stream.on('finish', function (e) {
+            this.mail.send('【sphinx release Error】');
+        }.bind(this));
+
         return stream;
     },
 
-    // 获取文件类型列表
-    get exts() {
-        if (!this._exts) {
-            this._exts = [];
-            if (Base.handler) {
-                Array.prototype.concat(
-                    Object.keys(Base.handler),
-                    Object.keys(this.handler)
-                )
-                .forEach(function (ext) {
-                    if (this._exts.indexOf(ext) === -1) {
-                        this._exts.push(ext);
-                    }
-                }.bind(this));
-            }
+    // 对 compile、optimize、postrelease 的封装
+    job: function (stream, type) {
+        var handlers = [];
+
+        if (!type) {
+            return stream;
         }
 
-        return this._exts;
+        handlers = Array.prototype.concat(
+            Object.keys(Base.handler),
+            Object.keys(this.handler)
+        );
+
+        handlers = unique(handlers);
+
+        handlers.forEach(function (key) {
+            var fileFilter = filter(function (file) {
+                var f = ((this.handler[key] && this.handler[key].filter) ||
+                    (Base.handler[key] && Base.handler[key].filter));
+
+                return f && f(file.path);
+            }.bind(this), {restore: true});
+
+            stream = stream.pipe(fileFilter);
+            if (Base.handler[key] && Base.handler[key][type]) {
+                stream = Base.handler[key][type](stream);
+            }
+            if (this.handler[key] && this.handler[key][type]) {
+                stream = this.handler[key][type](stream);
+            }
+            stream = stream.pipe(fileFilter.restore);
+        }.bind(this));
+
+        return stream;
     },
 
+    // 读取
     src: function (stream) {
-
         if (this._path.length > 0) {
             stream.add(gulp.src(this._path));
-            // this._path.forEach(function (path) {
-            //     var opts = {};
-
-            //     if (path.base) {
-            //         opts['base'] = path.base;
-            //     }
-            //     stream.add(
-            //         gulp.src(path.glob, opts)
-            //     );
-            // });
         }
         return stream;
     },
 
-    /* flag 是否更改文件名生成 .min 文件 */
-    dest: function (stream, flag) {
-        var filterStream, _this = this;
+    // 编译
+    compile: function (stream) {
+        return this.job(stream, 'compile');
+    },
 
+    // 压缩
+    optimize: function (stream) {
+        return this.job(stream, 'optimize');
+    },
+
+    // 语言转化
+    lang: function (stream) {
         stream = stream
-                .pipe(inline())
-                .pipe(embed());
+            .pipe(inline())
+            .pipe(embed());
+        return stream;
+    },
 
-        this.emit('compiled', stream, function (stm) {
-            stream = stm;
-        }, flag);
+    // 编译后处理器
+    postrelease: function (stream) {
+        return this.job(stream, 'postrelease');
+    },
 
+    // 写文件
+    dest: function (stream, flag) {
+        var filterStream;
+
+         // flag 是否更改文件名生成 .min 文件
         if (flag) {
             filterStream = filter(function (file) {
                 var path = file.path,
@@ -144,54 +178,14 @@ var prototype = {
             }));
             stream = stream.pipe(filterStream.restore);
         }
+
         return stream
-            .pipe(gulp.dest(this._dest))
-            .on('finish', function (e) {
-                _this.mail.send('【sphinx release Error】');
-            });
-    },
-
-    // 对 compile 和 optimize 的封装
-    job: function (stream, type) {
-        if (!type) {
-            return stream;
-        }
-
-        this.exts.forEach(function (extname) {
-            var fileFilter = filter(function (file) {
-                var f = ((this.handler[extname] && this.handler[extname].filter) ||
-                    (Base.handler[extname] && Base.handler[extname].filter));
-
-                return f && f(file.path);
-            }.bind(this), {restore: true});
-
-            stream = stream.pipe(fileFilter);
-            if (Base.handler[extname] && Base.handler[extname][type]) {
-                stream = Base.handler[extname][type](stream);
-            }
-            if (this.handler[extname] && this.handler[extname][type]) {
-                stream = this.handler[extname][type](stream);
-            }
-            stream = stream.pipe(fileFilter.restore);
-        }.bind(this));
-
-        return stream;
-    },
-
-    compile: function (stream) {
-        return this.job(stream, 'compile');
-    },
-
-    optimize: function (stream) {
-        return this.job(stream, 'optimize');
+            .pipe(gulp.dest(this._dest));
     },
 
     destory: function () {
-
     }
 };
-
-Base.constructor = Base;
 
 // 默认处理器
 Base.handler = {
@@ -289,11 +283,6 @@ Base.handler = {
 
 };
 
-Base.type = Object.keys(Base.handler);
-
-// 此处有坑，不能使用Base.prototype[key] = prototype[key]
-for (var key in prototype) {
-    Object.defineProperty(Base.prototype, key, Object.getOwnPropertyDescriptor(prototype, key));
-}
+Base.prototype.constructor = Base;
 
 module.exports = Base;
