@@ -22,7 +22,7 @@
     "immutable": "3.8.1",
     "liftoff": "2.2.1",
     "merge-stream": "1.0.0",
-    "nodemailer": "2.4.1",
+    "nodemailer": "2.4.2",
     "object-assign": "4.1.0",
     "pretty-hrtime": "1.0.2",
     "qrcode-terminal": "0.10.0",
@@ -60,8 +60,10 @@
     "sphinx": "./bin/sphinx"
   },
   "scripts": {
+    "lint": "eslint src test",
     "test": "./node_modules/mocha/bin/_mocha --recursive ./test",
     "cover": "./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly  --recursive ./test/** && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+
   },
   "bugs": {
     "web": "https://github.com/smocean/sphinxjs/issues"
@@ -74,6 +76,8 @@
     "autod": "2.5.1",
     "chai": "3.5.0",
     "coveralls": "^2.11.9",
+    "eslint": "^2.7.0",
+    "eslint-config-sm": "^0.1.20",
     "istanbul": "^0.4.3",
     "mocha": "^2.4.5",
     "mocha-lcov-reporter": "^1.2.0"
