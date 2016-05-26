@@ -1,3 +1,4 @@
+'use strict';
 var through = require('through2');
 // 需要 copy 的属性
 var keys = [

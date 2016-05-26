@@ -19,7 +19,6 @@ var ext = require('../ext');
 
 var util = require('util');
 var Event = require('events').EventEmitter;
-var objectAssign = require('object-assign');
 var Mail = require('../mail.js');
 
 function Base(path, conf) {
@@ -249,8 +248,8 @@ Base.handler = {
                     aggressiveMerging: true,
                     processImport: false, // 禁止import
                     mediaMerging: true, // 合并@media规则
-                    roundingPrecision: -1 //禁止四舍五入
-                }))
+                    roundingPrecision: -1 // 禁止四舍五入
+                }));
         }
     },
 
