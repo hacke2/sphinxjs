@@ -28,9 +28,8 @@ function execute(env) {
         cwd;
 
     gulp.task('config', function (cb) {
-        var tk, result;
+        var tk;
 
-        result = config.load(env.configPath);
         tk = config.get('task');
         cwd = config.get('cwd');
         dest = config.get('dest');
