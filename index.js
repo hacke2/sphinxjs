@@ -15,6 +15,10 @@ var sphinx = {
     util: util
 };
 
+// 任务锁，避免多次release
+var lock = false;
+var queue = [];
+
 if (!global.sphinx) {
     Object.defineProperty(global, 'sphinx', {
         enumerable: true,
@@ -52,16 +56,28 @@ function execute(env) {
         function listener(type) {
             return function (path) {
 
-                clearTimeout(timer);
-                timer = setTimeout(function () {
-                    var extname = util.extname(path);
+                function cb() {
+                    lock = true;
+                    clearTimeout(timer);
+                    timer = setTimeout(function () {
+                        var extname = util.extname(path);
 
-                    if (!util.isCss(extname)) {
-                        gulp.series('release', browserSync.reload)();
-                    } else {
-                        gulp.series('release')();
+                        if (!util.isCss(extname)) {
+                            gulp.series('release', browserSync.reload)();
+                        } else {
+                            gulp.series('release')();
+                        }
+                    }, 500);
+                }
+
+                if (lock) {
+                    if (queue.length >= 3) {
+                        queue.shift();
                     }
-                }, 500);
+                    queue.push(cb);
+                } else {
+                    cb();
+                }
             };
         }
 
@@ -88,7 +104,13 @@ function execute(env) {
         })
         .stream
         .pipe(filter('**/*.css'))
-        .pipe(browserSync.reload({stream: true}));
+        .pipe(browserSync.reload({stream: true}))
+        .on('finish', function () {
+            lock = false;
+            if (queue.length > 0) {
+                queue.shift()();
+            }
+        });
     });
 
     gulp.task('browserSync', function (cb) {
