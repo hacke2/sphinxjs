@@ -1,4 +1,5 @@
 {
+    "root": true,
     "extends": "sm/node-config",
     "env": {
         "node": true
