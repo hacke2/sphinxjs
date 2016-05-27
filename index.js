@@ -1,14 +1,12 @@
 'use strict';
 var gulp = require('gulp');
 var filter = require('gulp-filter');
-var chokidar = require('chokidar');
 var browserSync = require('browser-sync').create();
 var plugin = require('./src/plugin.js');
 var buildGlob = require('./src/glob.js');
 var config = require('./src/config.js');
 var Base = require('./src/task/base.js');
 var util = require('./src/util.js');
-var ewm = require('./src/ewm.js');
 var sphinx = {
     config: config,
     Base: Base,
@@ -30,24 +28,6 @@ if (!global.sphinx) {
 function execute(env) {
     var taskPlugin, dest, task,
         cwd;
-
-    gulp.task('config', function (cb) {
-        var tk;
-
-        tk = config.get('task');
-        cwd = config.get('cwd');
-        dest = config.get('dest');
-        if (tk != task) {
-            taskPlugin = plugin.loadTaskPlugin(tk);
-            task = tk;
-        }
-
-        if (!config.get('glob')) {
-            config.set('glob', buildGlob(cwd, dest));
-        }
-
-        cb();
-    });
 
     function watch(root) {
         var safePathReg = /[\\\/][_\-.\s\w]+$/i,
@@ -80,53 +60,77 @@ function execute(env) {
                 }
             };
         }
-
-        chokidar.watch(root, {
-            ignored: [
-                /[\/\\](\.)/,
-                require('path').join(root, dest)
-            ],
-            ignoreInitial: true
-        })
-        .on('change', listener('change'))
-        .on('unlink', listener('unlink'))
-        .on('add', listener('add'));
+        require('chokidar')
+            .watch(root, {
+                ignored: [
+                    /[\/\\](\.)/,
+                    require('path').join(root, dest)
+                ],
+                ignoreInitial: true
+            })
+            .on('change', listener('change'))
+            .on('unlink', listener('unlink'))
+            .on('add', listener('add'));
     }
 
-    gulp.task('build', function (cb) {
-        var include = config.get('glob');
+    gulp.task('release', gulp.series([
+        function (cb) {
+            var tk;
 
-        if (taskPlugin.error) {
-            cb(taskPlugin.error);
-        }
+            tk = config.get('task');
+            cwd = config.get('cwd');
+            dest = config.get('dest');
 
-        return new taskPlugin.Task(include, {
-            cwd: cwd,
-            dest: dest,
-            optimize: config.get('optimize')
-        })
-        .stream
-        .pipe(filter('**/*.css'))
-        .pipe(browserSync.reload({stream: true}))
-        .on('finish', function () {
-            lock = false;
-            if (queue.length > 0) {
-                queue.shift()();
+            if (tk != task) {
+                taskPlugin = plugin.loadTaskPlugin(tk);
+                task = tk;
             }
-        });
-    });
 
-    gulp.task('browserSync', function (cb) {
-        browserSync.init({
-            open: 'external',
-            server: dest
-        }, function () {
-            ewm(browserSync);
-            watch(cwd);
+            if (!config.get('glob')) {
+                config.set('glob', buildGlob(cwd, dest));
+            }
+
             cb();
-        });
-    });
-    gulp.task('release', gulp.series('config', 'build'));
-    gulp.task('server', gulp.series('release', 'browserSync'));
+        },
+        function (cb) {
+            var glob = config.get('glob');
+
+            if (taskPlugin.error) {
+                cb(taskPlugin.error);
+            }
+
+            return new taskPlugin.Task(glob, {
+                cwd: cwd,
+                dest: dest,
+                optimize: config.get('optimize')
+            })
+            .stream
+            .pipe(filter('**/*.css'))
+            .pipe(browserSync.reload({stream: true}))
+            .on('finish', function () {
+                lock = false;
+                if (queue.length > 0) {
+                    queue.shift()();
+                }
+            });
+        }
+    ]));
+
+    gulp.task('server', gulp.series([
+        'release',
+        function (cb) {
+            browserSync.init({
+                open: 'external',
+                server: dest
+            }, function () {
+                var ewm = require('./src/ewm.js');
+
+                // 生成二维码
+                ewm(browserSync);
+                watch(cwd);
+                cb();
+            });
+        }
+    ]));
 }
 module.exports = execute;

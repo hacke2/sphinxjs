@@ -50,17 +50,23 @@ function invoke(env) {
         process.exit(0);
     }
 
-    if (tasks.length === 0) {
-        tasks = ['release'];
-    }
     // 加载配置文件
     require('./index')(env);
 
     gulp.on('start', function (e) {
+        if (e.name === '<anonymous>') {
+            return;
+        }
         gutil.log('Starting', '\'' + chalk.cyan(e.name) + '\'...');
     });
     gulp.on('stop', function (e) {
-        var time = prettyTime(e.duration);
+        var time;
+
+        if (e.name === '<anonymous>') {
+            return;
+        }
+
+        time = prettyTime(e.duration);
 
         gutil.log(
             'Finished', '\'' + chalk.cyan(e.name) + '\'',
@@ -68,8 +74,14 @@ function invoke(env) {
         );
     });
     gulp.on('error', function (e) {
-        var msg = formatError(e);
-        var time = prettyTime(e.duration);
+        var msg, time;
+
+        if (e.name === '<anonymous>') {
+            return;
+        }
+
+        msg = formatError(e);
+        time = prettyTime(e.duration);
 
         gutil.log(
             '\'' + chalk.cyan(e.name) + '\'',
