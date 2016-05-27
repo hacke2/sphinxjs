@@ -50,12 +50,11 @@ function execute(env) {
     });
 
     function watch(root) {
-        var ignored = require('path').join(root, dest),
+        var safePathReg = /[\\\/][_\-.\s\w]+$/i,
             timer;
 
         function listener(type) {
             return function (path) {
-
                 function cb() {
                     lock = true;
                     clearTimeout(timer);
@@ -69,20 +68,24 @@ function execute(env) {
                         }
                     }, 500);
                 }
-
-                if (lock) {
-                    if (queue.length >= 3) {
-                        queue.shift();
+                if (safePathReg.test(path)) {
+                    if (lock) {
+                        if (queue.length >= 3) {
+                            queue.shift();
+                        }
+                        queue.push(cb);
+                    } else {
+                        cb();
                     }
-                    queue.push(cb);
-                } else {
-                    cb();
                 }
             };
         }
 
         chokidar.watch(root, {
-            ignored: ignored,
+            ignored: [
+                /[\/\\](\.)/,
+                require('path').join(root, dest)
+            ],
             ignoreInitial: true
         })
         .on('change', listener('change'))
