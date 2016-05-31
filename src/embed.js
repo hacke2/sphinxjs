@@ -1,136 +1,44 @@
-// todo 是否抛出插件级错误
-// todo 是否统一抛出错误，不中断编译流程。
-// todo 结合邮件提醒功能
 'use strict';
 var through = require('through2');
-var gutil = require('gulp-util');
-var util = require('./util');
+var _ = require('./util');
 var lang = require('./lang');
-var _map = {};
-var _cache = [];
 
-function clean() {
-    _map = {};
-    _cache.length = 0;
-}
+// 数据存储
+var store = {
 
-function getFile(path) {
-    var index = _map[path];
+    _store: {},
 
-    return _cache[index];
-}
+    // 添加
+    add: function (key, value) {
+        this._store[key] = value;
+    },
 
-function embed(obj, stream, cb) {
-    var file, contents, dirname, cwd;
+    // 删除
+    remove: function (key) {
+        delete this._store[key];
+    },
 
-    if (obj.piped) {
-        return;
+    // 查找
+    find: function (key) {
+        return this._store[key];
+    },
+
+    // 清空
+    clear: function () {
+        Object.keys(this._store)
+        .forEach(function (key) {
+            this.remove(key);
+        }.bind(this));
+    },
+
+    // 遍历
+    each: function (cb) {
+        Object.keys(this._store)
+        .forEach(function (key) {
+            cb(this.find(key));
+        }.bind(this));
     }
-
-    file = obj.file;
-
-    // 非图片
-    if (util.isImage(util.extname(file.path))) {
-        obj.piped = true;
-        stream.push(file);
-        return;
-    }
-
-    contents = file.contents.toString();
-    dirname = util.dirname(file.path);
-    cwd = file.cwd;
-
-    contents = contents.replace(lang.reg, function (all, type, depth, url, extra) {
-        var info, f, ret, message;
-
-        try {
-            switch (type) {
-                case 'embed':
-                    info = util.uri(url, dirname, cwd);
-                    f = getFile(info.release);
-
-                    if (f) {
-                        if (!f.piped) {
-                            embed(f, stream, cb);
-                        }
-
-                        ret = f.file.contents;
-                        if (!util.isText(info.rExtname)) {
-                            // 非文本文件 buffer
-                            ret = info.quote + util.base64(ret, info.rExtname) + info.quote;
-                        } else {
-                            // 文本文件必须 toString()
-                            ret = ret.toString();
-                        }
-                    } else {
-                        message = 'unable to embed file [' + info.release + '] in [' + file.path + ']';
-                    }
-                    break;
-                case 'uri':
-                    info = util.uri(url, dirname, cwd);
-                    f = getFile(info.release);
-
-                    // stream 中存在此文件
-                    if (info.url && f) {
-                        if (!f.piped) {
-                            embed(f, stream, cb);
-                        }
-
-                        ret = info.quote + info.url + info.quote;
-                    } else {
-                        if (info.exists) {
-                            message = 'unable to locate file [' + info.release + '] in [' + file.path + ']';
-                        }
-                        ret = url;
-                    }
-
-                    break;
-                case 'require':
-                    info = util.uri(url, dirname, cwd);
-                    f = getFile(info.release);
-
-                    if (info.id && f) {
-                        if (!f.piped) {
-                            embed(f, stream, cb);
-                        }
-
-                        ret = info.quote + info.id + info.quote;
-                    } else {
-                        if (info.exists) {
-                            message = 'unable to locate file [' + info.release + '] in [' + file.path + ']';
-                        }
-                        ret = url;
-                    }
-
-                    break;
-            }
-
-            if (message) {
-                // error
-                cb(new gutil.PluginError('embed', message));
-            }
-        } catch (e) {
-            message = e.message;
-            // error
-            cb(new gutil.PluginError('embed', message));
-        }
-
-        return ret;
-    });
-
-    file.contents = new Buffer(contents);
-    obj.piped = true;
-    stream.push(file);
-}
-
-function process(stream, cb) {
-    _cache.forEach(function (item) {
-        embed(item, stream, cb);
-    });
-
-    clean();
-    return cb();
-}
+};
 
 module.exports = function () {
     return through.obj(function (file, enc, cb) {
@@ -145,14 +53,106 @@ module.exports = function () {
         }
 
         if (file.isBuffer()) {
-            _cache.push({
+            store.add(file.path, {
                 file: file,
                 piped: false
             });
-            _map[file.path] = _cache.length - 1;
             cb();
         }
     }, function (cb) {
-        return process(this, cb);
+        var stream = this;
+
+        // 错误处理
+        function error(message) {
+            var util = require('gulp-util');
+
+            cb(new util.PluginError('embed', message));
+        };
+
+        function embed(obj) {
+            var file, contents, dirname, cwd;
+
+            if (obj.piped) {
+                return;
+            }
+
+            file = obj.file;
+
+            // 非图片
+            if (_.isImage(_.extname(file.path))) {
+                obj.piped = true;
+                stream.push(file);
+                return;
+            }
+
+            contents = file.contents.toString();
+            dirname = _.dirname(file.path);
+            cwd = file.cwd;
+
+            contents = contents.replace(lang.reg, function (all, type, depth, url, extra) {
+                var info, obj, ret, message;
+
+                info = _.uri(url, dirname, cwd);
+                obj = store.find(info.release);
+
+                if (obj && !obj.piped) {
+                    embed(obj);
+                }
+
+                try {
+                    switch (type) {
+                        case 'embed':
+                            if (obj) {
+                                ret = obj.file.contents;
+                                if (!_.isText(info.rExtname)) {
+                                    // 非文本文件 buffer
+                                    ret = info.quote + _.base64(ret, info.rExtname) + info.quote;
+                                } else {
+                                    // 文本文件必须 toString()
+                                    ret = ret.toString();
+                                }
+                            } else {
+                                message = 'unable to embed non-existent file [' + url + '] in [' + file.path + ']';
+                            }
+
+                            break;
+                        case 'uri':
+                            if (obj && info.url) {
+                                ret = info.quote + info.url + info.quote;
+                            } else {
+                                ret = url;
+                            }
+
+                            break;
+                        case 'require':
+                            if (obj && info.id) {
+                                ret = info.quote + info.id + info.quote;
+                            } else {
+                                ret = url;
+                            }
+
+                            break;
+                    }
+
+                    if (message) {
+                        error(message);
+                    }
+                } catch (e) {
+                    error(e.message + ' in [' + file.path + ']');
+                }
+
+                return ret;
+            });
+
+            file.contents = new Buffer(contents);
+            obj.piped = true;
+            stream.push(file);
+        }
+
+        store.each(embed);
+
+        // 清空
+        store.clear();
+        return cb();
     });
 };

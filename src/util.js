@@ -222,7 +222,6 @@ _.uri = function (filepath, dirname, cwd) {
                 filepath = [dirname, filepath].join('/');
             }
 
-            // filepath = filepath.replace(/[\/\\]+/g, '/').replace(/\\/g, '/');
             filepath = filepath.replace(/[\/\\]+/g, '/');
             filepath = path.normalize(filepath);
 
