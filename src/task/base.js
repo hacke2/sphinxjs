@@ -16,6 +16,7 @@ var _ = require('../util');
 var importer = require('../sass').importer;
 var fixImport = require('../sass').fixImport;
 var ext = require('../ext');
+var props = require('../props');
 var Mail = require('../mail.js');
 
 // 数组去重
@@ -131,6 +132,9 @@ Base.prototype = {
         if (this._path.length > 0) {
             stream.add(gulp.src(this._path));
         }
+
+        stream = stream.pipe(props());
+
         return stream;
     },
 
