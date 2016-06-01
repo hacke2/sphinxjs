@@ -2,43 +2,9 @@
 var through = require('through2');
 var _ = require('./util');
 var lang = require('./lang');
+var Store = require('./store');
 
-// 数据存储
-var store = {
-
-    _store: {},
-
-    // 添加
-    add: function (key, value) {
-        this._store[key] = value;
-    },
-
-    // 删除
-    remove: function (key) {
-        delete this._store[key];
-    },
-
-    // 查找
-    find: function (key) {
-        return this._store[key];
-    },
-
-    // 清空
-    clear: function () {
-        Object.keys(this._store)
-        .forEach(function (key) {
-            this.remove(key);
-        }.bind(this));
-    },
-
-    // 遍历
-    each: function (cb) {
-        Object.keys(this._store)
-        .forEach(function (key) {
-            cb(this.find(key));
-        }.bind(this));
-    }
-};
+var store = new Store;
 
 module.exports = function () {
     return through.obj(function (file, enc, cb) {
