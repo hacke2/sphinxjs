@@ -1,3 +1,10 @@
+/**
+ * Authors:
+ *     兆翔 <zzxzzx2015@126.com>
+ * Modifier
+ *     明礼 <guomilo@gmail.com>
+ */
+
 'use strict';
 var qrcode = require('qrcode-terminal');
 var gutil = require('gulp-util');

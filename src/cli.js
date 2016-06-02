@@ -1,3 +1,7 @@
+/**
+ * Authors:
+ *     明礼 <guomilo@gmail.com>
+ */
 'use strict';
 var yargs = require('yargs');
 var chalk = require('chalk');

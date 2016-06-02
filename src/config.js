@@ -1,3 +1,8 @@
+/**
+ * Authors:
+ *     明礼 <guomilo@gmail.com>
+ */
+
 'use strict';
 
 var gutil = require('gulp-util');
