@@ -1,3 +1,8 @@
+/**
+ * Authors:
+ *     明礼 <guomilo@gmail.com>
+ */
+
 'use strict';
 var yargs = require('yargs'),
     chalk = require('chalk'),
@@ -22,11 +27,11 @@ argvOptions = {
         type: 'boolean',
         describe: chalk.gray('with optimizing')
     },
-    t: {
-        alias: 'task',
+    s: {
+        alias: 'solution',
         demand: false,
         type: 'string',
-        describe: chalk.gray('mount plugin task')
+        describe: chalk.gray('mount solution')
     },
 
     g: {
@@ -57,8 +62,7 @@ commander = {
                 .options(argvOptions)
                 .usage(chalk.bold('\nUsage:') + ' $0 release [options]')
                 .help('h')
-                .alias('h', 'help')
-                .describe('help', chalk.gray('show help information'));
+                .describe('h', chalk.gray('show help information'));
         },
         handler: function (argv) {
         }
@@ -71,8 +75,7 @@ commander = {
                 .options(argvOptions)
                 .usage(chalk.bold('\nUsage:') + ' $0 server [options]')
                 .help('h')
-                .alias('h', 'help')
-                .describe('help', chalk.gray('show help information'));
+                .describe('h', chalk.gray('show help information'));
         },
         handler: function (argv) {
         }
