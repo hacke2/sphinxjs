@@ -5,28 +5,13 @@ var browserSync = require('browser-sync').create();
 var plugin = require('./src/plugin.js');
 var buildGlob = require('./src/glob.js');
 var config = require('./src/config.js');
-var Base = require('./src/task/base.js');
 var util = require('./src/util.js');
-var sphinx = {
-    config: config,
-    Base: Base,
-    util: util
-};
-
 // 任务锁，避免多次release
 var lock = false;
 var queue = [];
 
-if (!global.sphinx) {
-    Object.defineProperty(global, 'sphinx', {
-        enumerable: true,
-        writable: false,
-        value: sphinx
-    });
-}
-
 function execute(env) {
-    var taskPlugin, dest, task,
+    var extension, dest,
         cwd;
 
     function watch(root) {
@@ -75,31 +60,23 @@ function execute(env) {
 
     gulp.task('release', gulp.series([
         function (cb) {
-            var tk;
-
-            tk = config.get('task');
+            config.load(env.configPath);
             cwd = config.get('cwd');
             dest = config.get('dest');
-
-            if (tk != task) {
-                taskPlugin = plugin.loadTaskPlugin(tk);
-                task = tk;
-            }
-
-            if (!config.get('glob')) {
-                config.set('glob', buildGlob(cwd, dest));
-            }
-
+            buildGlob(cwd, dest);
             cb();
         },
         function (cb) {
-            var glob = config.get('glob');
+            var glob = config.get('glob'),
+                Solution, result;
 
-            if (taskPlugin.error) {
-                cb(taskPlugin.error);
+            result = plugin.loadSolution();
+            if (result.error) {
+                cb(result.error);
             }
+            Solution = result.solution;
 
-            return new taskPlugin.Task(glob, {
+            return new Solution(glob, {
                 cwd: cwd,
                 dest: dest,
                 optimize: config.get('optimize')
@@ -132,5 +109,9 @@ function execute(env) {
             });
         }
     ]));
+
+    gulp.task('mount', gulp.series([function (cb) {
+
+    }]));
 }
 module.exports = execute;

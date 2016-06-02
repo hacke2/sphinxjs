@@ -17,6 +17,22 @@ var cli = new Liftoff({
     }
 });
 
+var Base = require('./src/task/base.js');
+var util = require('./src/util.js');
+var sphinx = {
+    config: config,
+    Base: Base,
+    util: util
+};
+
+if (!global.sphinx) {
+    Object.defineProperty(global, 'sphinx', {
+        enumerable: true,
+        writable: false,
+        value: sphinx
+    });
+}
+
 tasks.splice(1);
 if (isCommand(tasks)) {
     cli.launch({
