@@ -4,26 +4,14 @@ var tmpl = require('gulp-template');
 var postcss = require('gulp-postcss');
 var util = require('util');
 var Base = require('./base');
-// var m2c = require('../m2c.js');
-// var config = require('../config.js');
+var config = require('../config.js');
 var ext = require('../ext.js');
 var _ = require('../util.js');
 // var objectAssign = require('object-assign');
+var m2c = require('../m2c.js');
 
 function Task(obj, conf) {
     Base.apply(this, arguments);
-    /* if (config.get('module')) {
-        var m2cConf = config.get('m2c') || {ns: 'sm'};
-
-        this.on('compiled', function (stream, cb, flag) {
-            m2cConf = objectAssign(m2cConf, {
-                fileBasedRoot: true,
-                isOptimizer: !!flag
-            });
-            stream = stream.pipe(m2c(m2cConf));
-            cb(stream);
-        });
-    }*/
 };
 
 util.inherits(Task, Base);
@@ -73,6 +61,25 @@ Task.prototype.handler = {
 
         optimize: function (stream) {
             return stream;
+        }
+    },
+    m2c: {
+        filter: function (path) {
+            var extname = _.extname(path);
+
+            return _.isJs(extname) || _.isHtml(extname);
+        },
+        postrelease: function (stream) {
+
+            if (config.get('module')) {
+                return stream.pipe(m2c({
+                    root: config.get('cwd'),
+                    fileBasedRoot: true
+                }));
+            } else {
+                return stream;
+            }
+
         }
     }
 

@@ -1,55 +1,33 @@
+/**
+ * Authors:
+ *     明礼 <guomilo@gmail.com>
+ */
+
 'use strict';
 var through = require('through2');
-var alpaca = require('alpaca-sm');
+var jsm2c = require('jsm2c');
 var gutil = require('gulp-util');
 var util = require('./util.js');
 var list = {};
 
-function m2c(file, stream, config, cb) {
-    var path, result;
-
-    if (!file.isDirectory()) {
-
-        path = file.path;
-        result = alpaca.processor({
-            src: path,
-            contentProcessor: function (aFile) {
-                var pathKey;
-
-                if (aFile.isLikeCss) {
-                    pathKey = aFile.dirname + '/' + aFile.basename + '.css';
-                } else {
-                    pathKey = aFile.realpath;
-                }
-
-                if (pathKey in list) {
-                    return list[pathKey].contents;
-                }
-
-            },
-            isJudgeFileExist: 0,
-            config: config || {
-                fileBasedRoot: false,
-                ns: 'sm'
-            }
-        });
-
-        // file.contents = new Buffer(storage[pth.relative(file.cwd,path).replace(/[\/\\]/, '/').replace(/^\\/, '')].getContent());
-        if (result) {
-            file.contents = new Buffer(result.getContent());
-        }
-    }
-    stream.push(file);
-}
-alpaca.log.on('warning', function (msg) {
-    gutil.log('gulp-m2c: ' + msg);
-});
 function processor(stream, config, cb) {
+    var file, content;
 
     try {
+        jsm2c.setGetContentHandler(function (path) {
+            if (this.realpath in list) {
+                return list[this.realpath].contents;
+            }
+        });
         for (var pth in list) {
+            file = list[pth];
+            content = jsm2c.parse(pth, config);
 
-            m2c(list[pth], stream, config, cb);
+            if (content) {
+                file.contents = new Buffer(content);
+            }
+
+            stream.push(file);
         }
     } catch (e) {
         cb(new gutil.PluginError('m2c', e.stack || e.error.stack));
