@@ -1,3 +1,7 @@
+/**
+ * Authors:
+ *     明礼 <guomilo@gmail.com>
+ */
 'use strict';
 
 var fs = require('fs');
@@ -14,8 +18,13 @@ function buildGlob(root, dest, deep) {
     var globs = [],
         files;
 
+    if (config.get('glob')) {
+        return;
+    }
+
     dest = formatPath(pth.relative(root, dest || config.get('dest'))).split('/')[0];
     deep = deep || 2;
+    globs.push('**.**');
     (function getBolbs(dir, curDeep) {
         files = fs.readdirSync(dir);
 
@@ -41,18 +50,19 @@ function buildGlob(root, dest, deep) {
                 if (curDeep < deep) {
                     getBolbs(path, curDeep + 1);
                 } else {
-
                     glob = rPath + '/**';
+                    glob && globs.push(glob, glob + '.**');
                 }
 
             } else {
                 glob = rPath;
+                glob && globs.push(glob);
             }
-            glob && globs.push(glob);
 
         });
     }(root, 1));
-    return globs;
+
+    config.set('glob', globs);
 }
 module.exports = buildGlob;
 
