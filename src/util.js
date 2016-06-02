@@ -87,6 +87,10 @@ _.getReleaseExt = function (ext) {
 
 _.exists = fs.existsSync || path.existsSync;
 
+_.fs = fs;
+
+_.path = path;
+
 _.isFile = function (filepath) {
     return _.exists(filepath) && fs.statSync(filepath).isFile();
 };
