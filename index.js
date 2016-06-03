@@ -68,14 +68,9 @@ function execute(env) {
         },
         function (cb) {
             var glob = config.get('glob'),
-                Solution, result;
+                Solution;
 
-            result = plugin.loadSolution();
-            if (result.error) {
-                cb(result.error);
-            }
-            Solution = result.solution;
-
+            Solution = plugin.loadSolution();
             return new Solution(glob, {
                 cwd: cwd,
                 dest: dest,
