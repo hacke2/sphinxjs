@@ -42,25 +42,61 @@ module.exports = {
         return require(_.path.join(this.getPluginOrSolutionDir(), 'node_modules', name));
     },
     loadSolution: function () {
-        var solution = this._load(config.get('solution'), true);
+        var name, solution;
 
-        if (solution instanceof Error) {
-            return {
-                error: solution
-            };
-        } else {
-            return {
-                solution: solution
-            };
+        name = config.get('solution');
+        if (!name) {
+            return require('./task/index.js');
         }
+        name = 'sphinx-solution-' + name;
+        solution = this._load(name);
 
+        if (solution && solution instanceof Error) {
+            gutil.log('Not install or Found ' + name + ', will use the default solution');
+            return require('./task/index.js');
+        } else {
+            return solution;
+        }
     },
-    loadPlugin: function () {
-        // 暂时hold
+    loadPlugin: function (stream, type) {
+
+        var plugins = config.get(['plugins', type]),
+            plugin, settings;
+
+        if (!Array.isArray(plugins)) {
+            if (_.is(plugins, 'string')) {
+                plugins = [{
+                    name: plugins,
+                    isGulp: false
+                }];
+            } else if (_.is(plugins, 'object') && name in plugins) {
+                plugins = [plugins];
+            } else {
+                return stream;
+            }
+        }
+        for (var i = 0, len = plugins.length, obj, pName; i < len; i++) {
+            obj = plugins[i];
+
+            if (!obj.name) {
+                continue;
+            }
+            if (!obj.isGulp) {
+                pName = 'sphinx-' + type + '-' + obj.name;
+            } else {
+                pName = 'gulp-' + obj.name;
+            }
+            plugin = this._load(pName);
+
+            if (plugin && !(plugin instanceof Error)) {
+                settings = config.get(['pluginSettings', obj.name]);
+                stream = stream.pipe(plugin(settings));
+            }
+        }
+        return stream;
     },
-    _load: function (name, isSolution) {
-        if (name) {
-            name = 'sphinx-' + (isSolution ? 'task' : 'plugin') + '-' + name;
+    _load: function (name) {
+        if (name && typeof name == 'string') {
             try {
                 return this._loadPOrSInPSDir(name);
             } catch (e) {
@@ -75,20 +111,16 @@ module.exports = {
                         this._install(name);
                         return this._loadPOrSInPSDir(name);
                     } catch (e2) {
-                        return new Error('load solution [' + name + '] error : ' + e2.message);
+                        return new Error('load [' + name + '] error : ' + e2.message);
                     }
-
                 }
             }
-
-        } else {
-            return require('./task/');
         }
     },
     _install: function (name) {
         var dir = this.getPluginOrSolutionDir();
 
-        gutil.log('Being install solution ' + name);
+        gutil.log('Being install ' + name);
         shell.cd(dir);
         shell.exec('npm install ' + name);
         shell.cd(config.get('cwd'));

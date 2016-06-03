@@ -2,6 +2,7 @@
 var fs = require('fs');
 var path = require('path');
 var ext = require('./ext');
+var toString = Object.prototype.toString;
 var _ = module.exports = {};
 
 var TEXT_EXTS = [
@@ -90,6 +91,10 @@ _.exists = fs.existsSync || path.existsSync;
 _.fs = fs;
 
 _.path = path;
+
+_.is = function (source, type) {
+    return toString.call(source).toLocaleLowerCase() === ('[object ' + type + ']').toLocaleLowerCase();
+};
 
 _.isFile = function (filepath) {
     return _.exists(filepath) && fs.statSync(filepath).isFile();
