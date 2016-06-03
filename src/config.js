@@ -11,7 +11,20 @@ var argv = Immutable.fromJS(require('./cli.js'));
 var defaultConfig = Immutable.fromJS({
     glob: null,
     dest: 'dist',
-    task: '',
+    solution: '',
+    plugins: {
+        postrelease: [{
+            name: 'm2c',
+            isGulp: false
+        }]
+    },
+    pluginSettings: {
+        postrelease: {
+            m2c: {
+                fileBasedRoot: true
+            }
+        }
+    },
     mail: {
         smtp: {
             host: 'smtp.qq.com',
