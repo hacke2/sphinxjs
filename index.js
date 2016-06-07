@@ -11,7 +11,7 @@ var lock = false;
 var queue = [];
 
 function execute(env) {
-    var extension, dest,
+    var dest,
         cwd;
 
     function watch(root) {
