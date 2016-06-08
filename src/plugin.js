@@ -10,6 +10,8 @@ var shell = require('shelljs');
 var config = require('./config.js');
 var gutil = require('gulp-util');
 var _ = require('./util.js');
+var fs = require('fs');
+var path = require('path');
 
 module.exports = {
     getPluginOrSolutionDir: function () {
@@ -25,10 +27,10 @@ module.exports = {
                 dir = process.env['HOMEERIVE'] + process.env['HOMEPATH'];
             }
         }
-        dir = _.path.join(dir, '.sphinxjs');
+        dir = path.join(dir, '.sphinxjs');
         if (!_.exists(dir)) {
-            _.fs.mkdirSync(dir);
-            _.fs.writeFileSync(_.path.join(dir, 'package.json'), JSON.stringify({
+            fs.mkdirSync(dir);
+            fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({
                 name: 'sphinx-plugin-solution',
                 description: 'sphinxjs的插件和扩展的安装目录',
                 license: 'MIT',
@@ -39,7 +41,7 @@ module.exports = {
         return dir;
     },
     _loadPOrSInPSDir: function (name) {
-        return require(_.path.join(this.getPluginOrSolutionDir(), 'node_modules', name));
+        return require(path.join(this.getPluginOrSolutionDir(), 'node_modules', name));
     },
     loadSolution: function () {
         var name, solution;
