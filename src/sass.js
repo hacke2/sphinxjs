@@ -45,7 +45,7 @@ function resolve(filename, dir, cwd) {
 
         info = util.uri(file, dir, cwd);
 
-        if (info.exists) {
+        if (util.isFile(info.realpath)) {
 
             contents = fs.readFileSync(info.realpath);
 
