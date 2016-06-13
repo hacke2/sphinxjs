@@ -31,14 +31,6 @@ var JS_EXTS = [
     ext.js
 ];
 
-var ES_EXTS = [
-    ext.es
-];
-
-var JSX_EXTS = [
-    ext.jsx
-];
-
 var CSS_EXTS = [
     ext.css,
     ext.scss,
@@ -47,6 +39,10 @@ var CSS_EXTS = [
 
 var HTML_EXTS = [
     ext.html
+];
+
+var JS_LIKE_EXTS = [
+    ext.tmpl
 ];
 
 var MIME_MAP = {};
@@ -116,16 +112,12 @@ _.isCss = function (extname) {
     return CSS_EXTS.indexOf(extname) > -1;
 };
 
+_.isJsLike = function (extname) {
+    return JS_LIKE_EXTS.indexOf(extname) > -1 || JS_EXTS.indexOf(extname) > -1;
+};
+
 _.isHtml = function (extname) {
     return HTML_EXTS.indexOf(extname) > -1;
-};
-
-_.isEs = function (extname) {
-    return ES_EXTS.indexOf(extname) > -1;
-};
-
-_.isJsx = function (extname) {
-    return JSX_EXTS.indexOf(extname) > -1;
 };
 
 _.dirname = function (filepath) {

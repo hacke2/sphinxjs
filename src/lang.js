@@ -54,7 +54,7 @@ module.exports = (function () {
         'require', // 同步依赖文件。
         // 'jsRequire', // 同步 js 依赖
         'embed', // 内嵌其他文件
-        // 'jsEmbed', // 内嵌 js 文件内容
+        'jsEmbed', // 内嵌 js 文件内容
         // 'async', // 异步依赖
         // 'jsAsync', // js 异步依赖
         'uri', // 替换成目标文件的 url

@@ -19,7 +19,7 @@ function execJs(contents) {
 
         switch (type) {
             case '__inline':
-                m = lang.embed.wrap(url);
+                m = lang.jsEmbed.wrap(url);
                 break;
             case '__uri':
                 m = lang.uri.wrap(url);

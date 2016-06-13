@@ -68,6 +68,7 @@ module.exports = function () {
                 try {
                     switch (type) {
                         case 'embed':
+                        case 'jsEmbed':
                             if (obj) {
                                 ret = obj.file.contents;
                                 if (!_.isText(info.rExtname)) {
@@ -76,6 +77,10 @@ module.exports = function () {
                                 } else {
                                     // 文本文件必须 toString()
                                     ret = ret.toString();
+                                    if (type === 'jsEmbed' &&
+                                        !_.isJsLike(info.rExtname)) {
+                                        ret = JSON.stringify(ret);
+                                    }
                                 }
                             } else {
                                 message = 'unable to embed non-existent file [' + url + '] in [' + file.path + ']';
