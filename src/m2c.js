@@ -47,7 +47,7 @@ module.exports = function (config) {
             return cb();
         }
         extname = util.extname(file.path);
-        if (!util.isJs(extname) && !util.isHtml(extname)) {
+        if (!util.isCss(extname) && !util.isJs(extname) && !util.isHtml(extname)) {
             this.push(file);
             return cb();
         }

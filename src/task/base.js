@@ -18,6 +18,7 @@ var fixImport = require('../sass').fixImport;
 var ext = require('../ext');
 var props = require('../props');
 var Mail = require('../mail.js');
+var through = require('through2');
 
 // 数组去重
 function unique(array) {
@@ -63,24 +64,22 @@ Base.prototype = {
         // 编译
         stream = this.compile(stream);
 
+        stream = this.lang(stream);
+        stream = this.postrelease(stream);
         // 拷贝副本
         if (this._optimize) {
             stream = stream
                 .pipe(copy());
         }
-
-        stream = this.lang(stream);
-        stream = this.postrelease(stream);
         stream = this.dest(stream);
-
         // 优化压缩
         if (this._optimize) {
             // 恢复文件，并释放内存
             stream = stream.pipe(copy.restore());
 
             stream = this.optimize(stream);
-            stream = this.lang(stream);
-            stream = this.postrelease(stream);
+            // stream = this.lang(stream);
+            // stream = this.postrelease(stream);
             stream = this.dest(stream, true);
         }
 

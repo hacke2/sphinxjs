@@ -7,7 +7,6 @@ var Base = require('./base');
 var config = require('../config.js');
 var ext = require('../ext.js');
 var _ = require('../util.js');
-// var objectAssign = require('object-assign');
 var m2c = require('../m2c.js');
 
 function Task(obj, conf) {
@@ -74,6 +73,7 @@ Task.prototype.handler = {
             if (config.get('module')) {
                 return stream.pipe(m2c({
                     root: config.get('cwd'),
+                    ns: config.get('ns') || 'sm',
                     fileBasedRoot: true
                 }));
             } else {

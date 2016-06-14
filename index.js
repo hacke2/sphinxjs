@@ -104,9 +104,5 @@ function execute(env) {
             });
         }
     ]));
-
-    gulp.task('mount', gulp.series([function (cb) {
-
-    }]));
 }
 module.exports = execute;
