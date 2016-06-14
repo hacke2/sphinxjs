@@ -18,7 +18,7 @@ var fixImport = require('../sass').fixImport;
 var ext = require('../ext');
 var props = require('../props');
 var Mail = require('../mail.js');
-var through = require('through2');
+var htmlmin = require('gulp-htmlmin');
 
 // 数组去重
 function unique(array) {
@@ -261,7 +261,11 @@ Base.handler = {
         compile: function (stream) {
             return stream;
         },
-
+        postrelease: function (stream) {
+            return stream.pipe(htmlmin({
+                collapseWhitespace: true
+            }));
+        },
         optimize: function (stream) {
             return stream;
         }
