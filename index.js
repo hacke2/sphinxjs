@@ -104,7 +104,8 @@ function execute(env) {
         function (cb) {
             browserSync.init({
                 open: 'external',
-                server: dest
+                server: dest,
+                directory: true
             }, function () {
                 var ewm = require('./src/ewm.js');
 

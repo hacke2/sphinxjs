@@ -19,6 +19,7 @@ var fixImport = require('../sass').fixImport;
 var ext = require('../ext');
 var props = require('../props');
 var Mail = require('../mail.js');
+var es6 = require('../es6.js');
 
 // 数组去重
 function unique(array) {
@@ -204,7 +205,8 @@ Base.handler = {
         },
 
         compile: function (stream) {
-            return stream;
+            return stream
+                .pipe(es6())
         },
 
         optimize: function (stream) {
