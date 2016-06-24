@@ -78,8 +78,8 @@ Base.prototype = {
             stream = stream.pipe(copy.restore());
 
             stream = this.optimize(stream);
-            // stream = this.lang(stream);
-            // stream = this.postrelease(stream);
+            stream = this.lang(stream);
+            stream = this.postrelease(stream);
             stream = this.dest(stream, true);
         }
 
