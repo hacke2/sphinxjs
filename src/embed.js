@@ -119,6 +119,11 @@ module.exports = function (cache) {
                         case 'require':
                             if (info.id) {
                                 ret = info.quote + info.id + info.quote;
+
+                                if (obj.file.sphinx) {
+                                    meta = obj.file.sphinx.meta;
+                                    c.deps.push(meta.path);
+                                }
                             } else {
                                 ret = url;
                             }

@@ -61,6 +61,9 @@ module.exports = function (cache, compile) {
                 if (type === 'embed' || type === 'jsEmbed') {
                     c.deps.push(info.realpath);
                 }
+                if (type === 'require') {
+                    c.deps.push(info.realpath);
+                }
             }
         });
     }
