@@ -30,7 +30,10 @@ function execute(env) {
                         var extname = util.extname(path);
 
                         if (!util.isCss(extname)) {
-                            gulp.series('release', browserSync.reload)();
+                            gulp.series('release', function (cb) {
+                                browserSync.reload();
+                                cb();
+                            })();
                         } else {
                             gulp.series('release')();
                         }
