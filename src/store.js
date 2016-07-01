@@ -31,11 +31,16 @@ Store.prototype = {
         }.bind(this));
     },
 
+    count: function () {
+           
+        return Object.keys(this._store).length;
+    },
+
     // 遍历
     each: function (cb) {
         Object.keys(this._store)
         .forEach(function (key) {
-            cb(this.find(key));
+            cb(this.find(key), key);
         }.bind(this));
     }
 

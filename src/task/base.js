@@ -12,6 +12,7 @@ var minifyCss = require('gulp-clean-css');
 var inline = require('../inline');
 var embed = require('../embed');
 var copy = require('../copy');
+var deps = require('../deps');
 var _ = require('../util');
 var importer = require('../sass').importer;
 var fixImport = require('../sass').fixImport;
@@ -35,11 +36,13 @@ function unique(array) {
     return r;
 }
 
-function Base(path, conf) {
+function Base(path, conf, cache) {
     this._path = path;
     this._optimize = conf.optimize;
     this._cwd = conf.cwd;
     this._dest = conf.dest;
+    this._lastRun = conf.lastRun;
+    this._cache = cache;
     this.mail = new Mail();
 }
 
@@ -63,6 +66,8 @@ Base.prototype = {
 
         // 编译
         stream = this.compile(stream);
+
+        stream = stream.pipe(deps(this._cache, this.compile.bind(this)));
 
         stream = this.lang(stream);
         stream = this.postrelease(stream);
@@ -129,7 +134,7 @@ Base.prototype = {
     // 读取
     src: function (stream) {
         if (this._path.length > 0) {
-            stream.add(gulp.src(this._path));
+            stream.add(gulp.src(this._path, {since: this._lastRun}));
         }
 
         stream = stream.pipe(props());
@@ -151,7 +156,7 @@ Base.prototype = {
     lang: function (stream) {
         stream = stream
             .pipe(inline())
-            .pipe(embed());
+            .pipe(embed(this._cache));
         return stream;
     },
 

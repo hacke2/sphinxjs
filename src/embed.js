@@ -6,7 +6,7 @@ var Store = require('./store');
 
 var store = new Store;
 
-module.exports = function () {
+module.exports = function (cache) {
     return through.obj(function (file, enc, cb) {
         if (file.isNull()) {
             this.push(file);
@@ -36,13 +36,28 @@ module.exports = function () {
         };
 
         function embed(obj) {
-            var file, contents, dirname, cwd;
+            var file, contents, dirname, cwd,
+                c, meta;
 
             if (obj.piped) {
                 return;
             }
 
             file = obj.file;
+
+            if (file.sphinx) {
+                meta = file.sphinx.meta;
+                cache.add(meta.path, {
+                    deps: [],
+                    props: {
+                        path: meta.path,
+                        cwd: meta.cwd,
+                        base: meta.base
+                    }
+                });
+
+                c = cache.find(meta.path);
+            }
 
             // 非图片
             if (_.isImage(_.extname(file.path))) {
@@ -56,7 +71,8 @@ module.exports = function () {
             cwd = file.cwd;
 
             contents = contents.replace(lang.reg, function (all, type, depth, url, extra) {
-                var info, obj, ret, message;
+                var info, obj, ret, message,
+                    meta;
 
                 info = _.uri(url, dirname, cwd);
                 obj = store.find(info.release);
@@ -81,6 +97,11 @@ module.exports = function () {
                                         !_.isJsLike(info.rExtname)) {
                                         ret = JSON.stringify(ret);
                                     }
+
+                                    if (obj.file.sphinx) {
+                                        meta = obj.file.sphinx.meta;
+                                        c.deps.push(meta.path);
+                                    }
                                 }
                             } else {
                                 message = 'unable to embed non-existent file [' + url + '] in [' + file.path + ']';
@@ -88,7 +109,7 @@ module.exports = function () {
 
                             break;
                         case 'uri':
-                            if (obj && info.url) {
+                            if (info.url) {
                                 ret = info.quote + info.url + info.quote;
                             } else {
                                 ret = url;
@@ -96,7 +117,7 @@ module.exports = function () {
 
                             break;
                         case 'require':
-                            if (obj && info.id) {
+                            if (info.id) {
                                 ret = info.quote + info.id + info.quote;
                             } else {
                                 ret = url;

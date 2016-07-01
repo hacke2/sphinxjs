@@ -6,9 +6,12 @@ var plugin = require('./src/plugin.js');
 var buildGlob = require('./src/glob.js');
 var config = require('./src/config.js');
 var util = require('./src/util.js');
+var Store = require('./src/store');
 // 任务锁，避免多次release
 var lock = false;
 var queue = [];
+
+var store = new Store;
 
 function execute(env) {
     var dest,
@@ -74,8 +77,9 @@ function execute(env) {
             return new Solution(glob, {
                 cwd: cwd,
                 dest: dest,
-                optimize: config.get('optimize')
-            })
+                optimize: config.get('optimize'),
+                lastRun: gulp.lastRun('release')
+            }, store)
             .stream
             .pipe(filter('**/*.css'))
             .pipe(browserSync.reload({stream: true}))

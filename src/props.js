@@ -17,7 +17,6 @@ module.exports = function () {
         }
 
         if (file.isBuffer()) {
-
             // 定义私有属性 meta，存储原始数据
             Object.defineProperty(props, 'meta', {
                 value: {
