@@ -51,6 +51,10 @@ argvOptions = {
     email: {
         type: 'boolean',
         describe: chalk.gray('send error to your set email')
+    },
+    sourcemap: {
+        type: 'boolean',
+        describe: chalk.gray('make map to css')
     }
 };
 commander = {

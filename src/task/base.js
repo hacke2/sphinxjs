@@ -20,6 +20,8 @@ var ext = require('../ext');
 var props = require('../props');
 var Mail = require('../mail.js');
 var es6 = require('../es6.js');
+var sourcemaps = require('gulp-sourcemaps');
+var config = require('../config.js');
 
 // 数组去重
 function unique(array) {
@@ -226,6 +228,8 @@ Base.handler = {
 
         compile: function (stream) {
             var scssFilter;
+            var isSourcemap = config.get('sourcemap');
+            var streamController;
 
             scssFilter = filter(function (file) {
                 var extname = _.extname(file.path);
@@ -233,14 +237,21 @@ Base.handler = {
                 return extname === ext.scss || extname === ext.sass;
             }, {restore: true});
 
-            return stream
+            if (isSourcemap) {
+                stream = stream.pipe(sourcemaps.init());
+            }
+            streamController = stream
                 .pipe(scssFilter)
                 .pipe(fixImport())
                 .pipe(sass({
                     importer: importer(this._cwd),
                     includePaths: [this._cwd]
-                }))
-                .pipe(scssFilter.restore);
+                }));
+
+            if (isSourcemap) {
+                streamController = streamController.pipe(sourcemaps.write());
+            }
+            return streamController.pipe(scssFilter.restore);
         },
 
         optimize: function (stream) {
