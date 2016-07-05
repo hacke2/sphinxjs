@@ -29,6 +29,10 @@ function execute(env) {
                     timer = setTimeout(function () {
                         var extname = util.extname(path);
 
+                        if (type === 'unlink') {
+                            store.remove(path);
+                        }
+
                         if (!util.isCss(extname)) {
                             gulp.series('release', function (cb) {
                                 browserSync.reload();

@@ -109,7 +109,7 @@ module.exports = function (cache) {
 
                             break;
                         case 'uri':
-                            if (info.url) {
+                            if (info.url && info.exists) {
                                 ret = info.quote + info.url + info.quote;
                             } else {
                                 ret = url;
@@ -117,7 +117,7 @@ module.exports = function (cache) {
 
                             break;
                         case 'require':
-                            if (info.id) {
+                            if (info.id && info.exists) {
                                 ret = info.quote + info.id + info.quote;
 
                                 if (obj.file.sphinx) {

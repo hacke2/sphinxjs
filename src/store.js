@@ -42,6 +42,10 @@ Store.prototype = {
         .forEach(function (key) {
             cb(this.find(key), key);
         }.bind(this));
+    },
+
+    keys: function () {
+        return Object.keys(this._store);
     }
 
 };
