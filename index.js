@@ -85,7 +85,8 @@ function execute(env) {
                 cwd: cwd,
                 dest: dest,
                 optimize: config.get('optimize'),
-                lastRun: gulp.lastRun('release')
+                lastRun: gulp.lastRun('release'),
+				sourcemap: config.get('sourcemap')
             }, store)
             .stream
             .pipe(filter('**/*.css'))

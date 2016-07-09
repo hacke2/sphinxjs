@@ -21,7 +21,8 @@ var props = require('../props');
 var Mail = require('../mail.js');
 var es6 = require('../es6.js');
 var sourcemaps = require('gulp-sourcemaps');
-var config = require('../config.js');
+var ifElse = require('gulp-if-else');
+var isSourcemap;
 
 // 数组去重
 function unique(array) {
@@ -45,6 +46,7 @@ function Base(path, conf, cache) {
     this._dest = conf.dest;
     this._lastRun = conf.lastRun;
     this._cache = cache;
+    this._sourcemap = isSourcemap = conf.sourcemap;
     this.mail = new Mail();
 }
 
@@ -228,8 +230,6 @@ Base.handler = {
 
         compile: function (stream) {
             var scssFilter;
-            var isSourcemap = config.get('sourcemap');
-            var streamController;
 
             scssFilter = filter(function (file) {
                 var extname = _.extname(file.path);
@@ -237,21 +237,16 @@ Base.handler = {
                 return extname === ext.scss || extname === ext.sass;
             }, {restore: true});
 
-            if (isSourcemap) {
-                stream = stream.pipe(sourcemaps.init());
-            }
-            streamController = stream
+            return stream
+                .pipe(ifElse(isSourcemap, sourcemaps.init))
                 .pipe(scssFilter)
                 .pipe(fixImport())
                 .pipe(sass({
                     importer: importer(this._cwd),
                     includePaths: [this._cwd]
-                }));
-
-            if (isSourcemap) {
-                streamController = streamController.pipe(sourcemaps.write());
-            }
-            return streamController.pipe(scssFilter.restore);
+                }))
+                .pipe(ifElse(isSourcemap, sourcemaps.write))
+                .pipe(scssFilter.restore);
         },
 
         optimize: function (stream) {
