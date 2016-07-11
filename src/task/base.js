@@ -119,15 +119,15 @@ Base.prototype = {
                 var f = ((this.handler[key] && this.handler[key].filter) ||
                     (Base.handler[key] && Base.handler[key].filter));
 
-                return f && f(file.path);
+                return f && f.call(this, file.path);
             }.bind(this), {restore: true});
 
             stream = stream.pipe(fileFilter);
             if (Base.handler[key] && Base.handler[key][type]) {
-                stream = Base.handler[key][type](stream);
+                stream = Base.handler[key][type].call(this, stream);
             }
             if (this.handler[key] && this.handler[key][type]) {
-                stream = this.handler[key][type](stream);
+                stream = this.handler[key][type].call(this, stream);
             }
             stream = stream.pipe(fileFilter.restore);
         }.bind(this));
@@ -210,7 +210,7 @@ Base.handler = {
 
         compile: function (stream) {
             return stream
-                .pipe(es6())
+                .pipe(es6());
         },
 
         optimize: function (stream) {
