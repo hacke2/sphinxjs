@@ -52,7 +52,7 @@ function Config() {
             if (path) {
                 try {
                     conf = Immutable.fromJS(require(path));
-
+                    delete require.cache(path);
                     config = config.mergeDeep(conf);
 
                     return true;

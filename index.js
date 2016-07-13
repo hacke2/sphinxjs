@@ -70,6 +70,7 @@ function execute(env) {
 
     gulp.task('release', gulp.series([
         function (cb) {
+            config.set('glob', null);
             config.load(env.configPath);
             cwd = config.get('cwd');
             dest = config.get('dest');
