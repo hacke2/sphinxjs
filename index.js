@@ -5,68 +5,85 @@ var browserSync = require('browser-sync').create();
 var plugin = require('./src/plugin.js');
 var buildGlob = require('./src/glob.js');
 var config = require('./src/config.js');
-var util = require('./src/util.js');
 var Store = require('./src/store');
-// 任务锁，避免多次release
-var lock = false;
-var queue = [];
 
 var store = new Store;
+
+var running = false;
+var queue = [];
+
+function watch(root, opts, cb) {
+    var delay = 200;
+    var safePathReg = /[\\\/][_\-.\s\w]+$/i;
+
+    function debounce(func, wait) {
+        var timeout, args = [], context, timestamp;
+
+        function later() {
+            // 据上一次触发时间间隔
+            var last = Date.now() - timestamp;
+
+            // 上次被包装函数被调用时间间隔last小于设定时间间隔wait
+            if (last < wait && last > 0) {
+                timeout = setTimeout(later, wait - last);
+            } else {
+                timeout = null;
+                func.apply(context, args);
+                args = [];
+                context = null;
+            }
+        };
+
+        return function () {
+            context = this;
+
+            args = args ? args.concat([].slice.call(arguments)) : [].slice.call(args);
+
+            timestamp = Date.now();
+            // 如果延时不存在，重新设定延时
+            if (!timeout) {
+                timeout = setTimeout(later, wait);
+            }
+        };
+    };
+
+    function listener(type) {
+        return function () {
+            var args = [].slice.call(arguments);
+
+            if (running) {
+                queue.push({
+                    type: type,
+                    args: args
+                });
+
+                return;
+            }
+
+            running = true;
+
+            args.forEach(function (path, i) {
+                if (!safePathReg.test(path)) {
+                    args.splice(i, 1);
+                }
+            });
+
+            if (args.length > 0) {
+                cb(type, args);
+            }
+        };
+    }
+
+    require('chokidar')
+        .watch(root, opts)
+        .on('change', debounce(listener('change'), delay))
+        .on('unlink', debounce(listener('unlink'), delay))
+        .on('add', debounce(listener('add'), delay));
+}
 
 function execute(env) {
     var dest,
         cwd;
-
-    function watch(root) {
-        var safePathReg = /[\\\/][_\-.\s\w]+$/i,
-            timer;
-
-        function listener(type) {
-            return function (path) {
-                function cb() {
-                    lock = true;
-                    clearTimeout(timer);
-                    timer = setTimeout(function () {
-                        var extname = util.extname(path);
-
-                        if (type === 'unlink') {
-                            store.remove(path);
-                        }
-
-                        if (!util.isCss(extname)) {
-                            gulp.series('release', function (cb) {
-                                browserSync.reload();
-                                cb();
-                            })();
-                        } else {
-                            gulp.series('release')();
-                        }
-                    }, 500);
-                }
-                if (safePathReg.test(path)) {
-                    if (lock) {
-                        if (queue.length >= 3) {
-                            queue.shift();
-                        }
-                        queue.push(cb);
-                    } else {
-                        cb();
-                    }
-                }
-            };
-        }
-        require('chokidar')
-            .watch(root, {
-                ignored: [
-                    /[\/\\](\.)/,
-                    require('path').join(root, dest)
-                ],
-                ignoreInitial: true
-            })
-            .on('change', listener('change'))
-            .on('unlink', listener('unlink'))
-            .on('add', listener('add'));
-    }
 
     gulp.task('release', gulp.series([
         function (cb) {
@@ -93,10 +110,8 @@ function execute(env) {
             .pipe(filter('**/*.css'))
             .pipe(browserSync.reload({stream: true}))
             .on('finish', function () {
-                lock = false;
-                if (queue.length > 0) {
-                    queue.shift()();
-                }
+                running = false;
+                queue.length = 0;
             });
         }
     ]));
@@ -113,7 +128,44 @@ function execute(env) {
 
                 // 生成二维码
                 ewm(browserSync);
-                watch(cwd);
+                watch(cwd, {
+                    ignored: [
+                        /[\/\\](\.)/,
+                        require('path').join(cwd, dest)
+                    ],
+                    ignoreInitial: true
+                }, function (type, paths) {
+                    var util = require('./src/util.js');
+                    var cssFlag;
+
+                    if (paths.length === 0) {
+                        return;
+                    }
+
+                    if (type === 'unlink') {
+                        paths.forEach(function (path) {
+                            store.remove(path);
+                        });
+                        return;
+                    }
+
+                    cssFlag = paths.every(function (path) {
+                        var extname = util.extname(path);
+
+                        if (!util.isCss(extname)) {
+                            gulp.series('release', function (cb) {
+                                browserSync.reload();
+                                cb();
+                            })();
+                            return false;
+                        }
+                        return true;
+                    });
+
+                    if (cssFlag) {
+                        gulp.series('release')();
+                    }
+                });
                 cb();
             });
         }
