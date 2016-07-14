@@ -54,21 +54,23 @@ function invoke(env) {
 
     if (config.get('version') && tasks.length === 0) {
         console.log('\n\r  v' + pkg.version + '\n');
-        version.push('\t┏┛ ┻━━━━━┛ ┻┓');
-        version.push('\t┃           ┃');
-        version.push('\t┃　 　━     ┃');
-        version.push('\t┃  ┳┛   ┗┳　┃');
-        version.push('\t┃　 　　　  ┃');
-        version.push('\t┃     ┻　　 ┃');
-        version.push('\t┗━┓　　┏━━━━┛');
-        version.push('\t  ┃　　┃');
-        version.push('\t  ┃　　┗━━━━━━━━┓');
-        version.push('\t  ┃　　　　　　 ┣┓');
-        version.push('\t  ┃　　　　     ┏┛');
-        version.push('\t  ┗━┓ ┓ ┏━┳ ┓ ┏━┛');
-        version.push('\t    ┃ ┫ ┫ ┃ ┫ ┫');
-        version.push('\t    ┗━┻━┛ ┗━┻━┛\n\r');
-        console.log(chalk.yellow(version.join('\n')));
+        // version.push('\t┏┛ ┻━━━━━┛ ┻┓');
+        // version.push('\t┃           ┃');
+        // version.push('\t┃　 　━     ┃');
+        // version.push('\t┃  ┳┛   ┗┳　┃');
+        // version.push('\t┃　 　　　  ┃');
+        // version.push('\t┃     ┻　　 ┃');
+        // version.push('\t┗━┓　　┏━━━━┛');
+        // version.push('\t  ┃　　┃');
+        // version.push('\t  ┃　　┗━━━━━━━━┓');
+        // version.push('\t  ┃　　　　　　 ┣┓');
+        // version.push('\t  ┃　　　　     ┏┛');
+        // version.push('\t  ┗━┓ ┓ ┏━┳ ┓ ┏━┛');
+        // version.push('\t    ┃ ┫ ┫ ┃ ┫ ┫');
+        // version.push('\t    ┗━┻━┛ ┗━┻━┛\n\r');
+        // console.log(chalk.yellow(version.join('\n')));
+        console.log(bigFont('SPHINX', {space: '', lineStyle: -1, blockStyle: 2, colors: ['red', 'yellow', 'red', 'green', 'red']}));
+        console.log('\n');
         process.exit(0);
     }
 
@@ -156,4 +158,37 @@ function formatError(e) {
 
     // Unknown (string, number, etc.)
     return new Error(String(e.error)).stack;
+}
+function bigFont(c, opts) {
+    var lines = [],
+        space,
+        prefix,
+        suffix,
+        bigfont = require('bigfont');
+
+    opts = opts || {};
+    space = opts.lineStyle < 0 ? ' ' : '';
+    prefix = opts.prefix || '';
+    suffix = opts.suffix || '';
+
+    c.split('').forEach(function (text, index) {
+        var colorName = Array.isArray(opts.colors) && opts.colors[index],
+            color = colorName in chalk ? chalk[colorName] : chalk['cyan'],
+            temp = bigfont.lattice(text, opts);
+
+        temp.split(/\n/).forEach(function (text, index) {
+            if (!lines[index]) {
+                lines[index] = '';
+            }
+            if (text) {
+                lines[index] += space + color(text);
+            }
+        });
+    });
+    if (prefix || suffix) {
+        lines = lines.map(function (line) {
+            return prefix + line + suffix;
+        });
+    }
+    return lines.join('\n');
 }

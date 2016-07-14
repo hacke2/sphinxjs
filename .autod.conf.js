@@ -1,6 +1,7 @@
 module.exports = {
     write: true,
     keep: [
-        'gulp'
+        'gulp',
+        'bigfont'
     ]
 };
