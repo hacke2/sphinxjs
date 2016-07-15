@@ -97,11 +97,10 @@ module.exports = function (cache) {
                                         !_.isJsLike(info.rExtname)) {
                                         ret = JSON.stringify(ret);
                                     }
-
-                                    if (obj.file.sphinx) {
-                                        meta = obj.file.sphinx.meta;
-                                        c.deps.push(meta.path);
-                                    }
+                                }
+                                if (obj.file.sphinx) {
+                                    meta = obj.file.sphinx.meta;
+                                    c.deps.push(meta.path);
                                 }
                             } else {
                                 message = 'unable to embed non-existent file [' + url + '] in [' + file.path + ']';

@@ -8,6 +8,7 @@ var fs = require('fs');
 var props = require('./props');
 var objectAssign = require('object-assign');
 var File = require('vinyl');
+var Promise = require('promise');
 
 var exists;
 
@@ -58,10 +59,7 @@ module.exports = function (cache, compile) {
             var info = _.uri(url, dirname, cwd);
 
             if (info.realpath && info.exists) {
-                if (type === 'embed' || type === 'jsEmbed') {
-                    c.deps.push(info.realpath);
-                }
-                if (type === 'require') {
+                if (type === 'embed' || type === 'jsEmbed' || type === 'require') {
                     c.deps.push(info.realpath);
                 }
             }
@@ -90,38 +88,9 @@ module.exports = function (cache, compile) {
         return rets;
     }
 
-    // 生成stream文件
-    function addFile(deps, cb) {
-        var stream = through.obj(function (file, enc, cb) {
-            this.push(file);
-            cb();
-        });
-
-        deps.forEach(function (path) {
-            var obj = {};
-
-            if (exists.indexOf(path) !== -1) {
-                return;
-            }
-
-            objectAssign(obj, cache.find(path).props);
-            obj['stat'] = fs.lstatSync(path);
-            obj['contents'] = fs.readFileSync(path);
-
-            stream.write(new File(obj));
-            exists.push(path);
-        });
-
-        stream = stream.pipe(props());
-        stream = compile(stream);
-        stream.on('data', function (file) {
-            cb(file);
-        });
-
-    }
-
     return through.obj(function (file, enc, cb) {
         var deps = [];
+        var self = this;
 
         if (file.isNull()) {
             this.push(file);
@@ -134,18 +103,50 @@ module.exports = function (cache, compile) {
         }
 
         if (file.isBuffer()) {
-
             if (cache.count() !== 0) {
                 updateDeps(file);
                 deps = getDeps(file);
 
-                addFile(deps, function (file) {
-                    this.write(file);
-                }.bind(this));
+                Promise.all(deps.map(function (path) {
+                    return new Promise(function (resolve, reject) {
+                        var stream;
+                        var obj = {};
 
+                        if (exists.indexOf(path) !== -1) {
+                            resolve();
+                        } else {
+                            try {
+                                stream = through.obj(function (file, enc, cb) {
+                                    this.push(file);
+                                    cb();
+                                });
+                                objectAssign(obj, cache.find(path).props);
+                                obj['stat'] = fs.lstatSync(path);
+                                obj['contents'] = fs.readFileSync(path);
+
+                                stream.write(new File(obj));
+                                stream = stream.pipe(props());
+                                stream = compile(stream);
+                                stream.on('data', function (file) {
+                                    self.write(file);
+                                    resolve();
+                                });
+                            } catch (e) {
+                                reject(e);
+                            }
+                        }
+                    });
+                })).then(function () {
+                    self.push(file);
+                    cb();
+                }, function () {
+                    self.push(file);
+                    cb();
+                });
+            } else {
+                this.push(file);
+                return cb();
             }
-            this.push(file);
-            return cb();
         }
     }, function (cb) {
         exists = [];
