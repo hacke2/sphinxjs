@@ -32,7 +32,6 @@ Store.prototype = {
     },
 
     count: function () {
-           
         return Object.keys(this._store).length;
     },
 

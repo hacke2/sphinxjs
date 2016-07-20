@@ -70,7 +70,8 @@
   "scripts": {
     "lint": "./node_modules/eslint/bin/eslint.js .",
     "test": "./node_modules/mocha/bin/_mocha --recursive ./test",
-    "cover": "./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly  --recursive ./test/** && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    "cover": "./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly  --recursive ./test/** && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
+    "prepush": "npm run lint"
   },
   "bugs": {
     "web": "https://github.com/smocean/sphinxjs/issues"
@@ -85,6 +86,7 @@
     "coveralls": "^2.11.9",
     "eslint": "^2.7.0",
     "eslint-config-sm": "^0.1.20",
+    "husky": "^0.11.5",
     "istanbul": "^0.4.3",
     "mocha": "^2.4.5",
     "mocha-lcov-reporter": "^1.2.0"

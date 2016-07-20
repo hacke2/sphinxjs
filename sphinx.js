@@ -50,8 +50,6 @@ if (isCommand(tasks)) {
 }
 
 function invoke(env) {
-    var version = [];
-
     if (config.get('version') && tasks.length === 0) {
         console.log('\n\r  v' + pkg.version + '\n');
         // version.push('\t┏┛ ┻━━━━━┛ ┻┓');
