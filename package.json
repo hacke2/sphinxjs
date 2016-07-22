@@ -1,7 +1,7 @@
 {
   "name": "sphinxjs",
   "description": "基于gulp4，借鉴fis的构建工具",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "dependencies": {
     "autoprefixer": "6.3.7",
     "babel-core": "6.10.4",
