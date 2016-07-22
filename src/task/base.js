@@ -12,7 +12,7 @@ var minifyCss = require('gulp-clean-css');
 var inline = require('../inline');
 var embed = require('../embed');
 var copy = require('../copy');
-var deps = require('../deps');
+// var deps = require('../deps');
 var _ = require('../util');
 var importer = require('../sass').importer;
 var fixImport = require('../sass').fixImport;
@@ -69,7 +69,7 @@ Base.prototype = {
         // 编译
         stream = this.compile(stream);
 
-        stream = stream.pipe(deps(this._cache, this.compile.bind(this)));
+        // stream = stream.pipe(deps(this._cache, this.compile.bind(this)));
 
         stream = this.lang(stream);
         stream = this.postrelease(stream);
@@ -136,7 +136,8 @@ Base.prototype = {
     // 读取
     src: function (stream) {
         if (this._path.length > 0) {
-            stream.add(gulp.src(this._path, {since: this._lastRun}));
+            // stream.add(gulp.src(this._path, {since: this._lastRun}));
+            stream.add(gulp.src(this._path));
         }
 
         stream = stream.pipe(props());
