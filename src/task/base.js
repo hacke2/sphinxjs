@@ -5,10 +5,7 @@ var gulp = require('gulp');
 var plumber = require('gulp-plumber');
 var notify = require('gulp-notify');
 var filter = require('gulp-filter');
-var rename = require('gulp-rename');
-var uglify = require('gulp-uglify');
 var sass = require('gulp-sass');
-var minifyCss = require('gulp-clean-css');
 var inline = require('../inline');
 var embed = require('../embed');
 var copy = require('../copy');
@@ -19,7 +16,6 @@ var fixImport = require('../sass').fixImport;
 var ext = require('../ext');
 var props = require('../props');
 var Mail = require('../mail.js');
-var es6 = require('../es6.js');
 var ifElse = require('gulp-if-else');
 
 // 数组去重
@@ -45,6 +41,7 @@ function Base(path, conf, cache) {
     this._lastRun = conf.lastRun;
     this._cache = cache;
     this._sourcemap = conf.sourcemap;
+    this._es6 = conf.es6;
     this.mail = new Mail();
 }
 
@@ -171,9 +168,11 @@ Base.prototype = {
     // 写文件
     dest: function (stream, flag) {
         var filterStream;
+        var rename;
 
          // flag 是否更改文件名生成 .min 文件
         if (flag) {
+            rename = require('gulp-rename');
             filterStream = filter(function (file) {
                 var path = file.path,
                     extname = _.extname(path);
@@ -209,10 +208,16 @@ Base.handler = {
 
         compile: function (stream) {
             return stream
-                .pipe(es6());
+                .pipe(ifElse(this._es6, function () {
+                    var es6 = require('../es6');
+
+                    return es6();
+                }));
         },
 
         optimize: function (stream) {
+            var uglify = require('gulp-uglify');
+
             // js 文件压缩
             // todo 设置参数
             return stream
@@ -229,7 +234,6 @@ Base.handler = {
 
         compile: function (stream) {
             var scssFilter;
-            var sourcemaps = require('gulp-sourcemaps');
 
             scssFilter = filter(function (file) {
                 var extname = _.extname(file.path);
@@ -238,18 +242,28 @@ Base.handler = {
             }, {restore: true});
 
             return stream
-                .pipe(ifElse(this._sourcemap, sourcemaps.init))
+                .pipe(ifElse(this._sourcemap, function () {
+                    var sourcemaps = require('gulp-sourcemaps');
+
+                    return sourcemaps.init();
+                }))
                 .pipe(scssFilter)
                 .pipe(fixImport())
                 .pipe(sass({
                     importer: importer(this._cwd),
                     includePaths: [this._cwd]
                 }))
-                .pipe(ifElse(this._sourcemap, sourcemaps.write))
+                .pipe(ifElse(this._sourcemap, function () {
+                    var sourcemaps = require('gulp-sourcemaps');
+
+                    return sourcemaps.write();
+                }))
                 .pipe(scssFilter.restore);
         },
 
         optimize: function (stream) {
+            var minifyCss = require('gulp-clean-css');
+
             // css 文件压缩 todo 设置参数
             return stream
                 .pipe(minifyCss({

@@ -55,6 +55,10 @@ argvOptions = {
     sourcemap: {
         type: 'boolean',
         describe: chalk.gray('make map to css')
+    },
+    es6: {
+        type: 'boolean',
+        describe: chalk.gray('opening es6')
     }
 };
 commander = {
