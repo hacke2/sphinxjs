@@ -33,12 +33,17 @@ argvOptions = {
         type: 'string',
         describe: chalk.gray('mount solution')
     },
-
     g: {
         alias: 'glob',
         type: 'array',
         describe: chalk.gray('fiter release file')
     },
+    /* L: {
+        alias: 'livereload',
+        demand: false,
+        type: 'boolean',
+        describe: chalk.gray('automatically reload your browser')
+    },*/
     sphinxconf: {
         type: 'string',
         describe: chalk.gray('Manually set path of sphinxconf')
@@ -59,6 +64,10 @@ argvOptions = {
     es6: {
         type: 'boolean',
         describe: chalk.gray('opening es6')
+    },
+    sync: {
+        type: 'boolean',
+        describe: chalk.gray('use browsersync')
     }
 };
 commander = {
