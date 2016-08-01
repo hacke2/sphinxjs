@@ -41,6 +41,7 @@ function watch(glob, opts, cb) {
 
     function runComplete(err) {
         running = false;
+
         if (err) {
             watcher.emit('error', err);
         }
@@ -78,7 +79,10 @@ function watch(glob, opts, cb) {
     watcher
         .on('change', fn)
         .on('unlink', fn)
-        .on('add', fn);
+        .on('add', fn)
+        .on('error', function (err) {
+            console.log(err);
+        });
 
     return watcher;
 }
