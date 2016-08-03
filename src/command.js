@@ -64,10 +64,6 @@ argvOptions = {
     es6: {
         type: 'boolean',
         describe: chalk.gray('opening es6')
-    },
-    sync: {
-        type: 'boolean',
-        describe: chalk.gray('use browsersync')
     }
 };
 commander = {
