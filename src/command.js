@@ -6,7 +6,10 @@
 'use strict';
 var yargs = require('yargs'),
     chalk = require('chalk'),
-    argvOptions, commander;
+    objectAssign = require('object-assign'),
+    argvOptions,
+    serverArgvOptions,
+    commander;
 
 argvOptions = {
     M: {
@@ -38,13 +41,6 @@ argvOptions = {
         type: 'array',
         describe: chalk.gray('fiter release file')
     },
-    L: {
-        alias: 'livereload',
-        'default': true,
-        demand: false,
-        type: 'boolean',
-        describe: chalk.gray('automatically reload your browser')
-    },
     sphinxconf: {
         type: 'string',
         describe: chalk.gray('Manually set path of sphinxconf')
@@ -66,12 +62,24 @@ argvOptions = {
         type: 'boolean',
         describe: chalk.gray('opening es6')
     },
+};
+
+serverArgvOptions = objectAssign({
+    L: {
+        alias: 'livereload',
+        'default': true,
+        demand: false,
+        type: 'boolean',
+        describe: chalk.gray('automatically reload your browser')
+    },
+
     qrcode: {
         type: 'boolean',
         'default': true,
         describe: chalk.gray('generate qrcode')
     }
-};
+}, argvOptions);
+
 commander = {
     release: {
         command: 'release',
@@ -91,7 +99,7 @@ commander = {
         describe: chalk.gray('launch web server'),
         builder: function () {
             return yargs
-                .options(argvOptions)
+                .options(serverArgvOptions)
                 .usage(chalk.bold('\nUsage:') + ' $0 server [options]')
                 .help('h')
                 .describe('h', chalk.gray('show help information'));
