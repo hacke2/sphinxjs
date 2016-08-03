@@ -65,6 +65,11 @@ argvOptions = {
     es6: {
         type: 'boolean',
         describe: chalk.gray('opening es6')
+    },
+    qrcode: {
+        type: 'boolean',
+        'default': true,
+        describe: chalk.gray('generate qrcode')
     }
 };
 commander = {

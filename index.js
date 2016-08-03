@@ -46,10 +46,13 @@ function execute(env) {
                 server: config.get('dest'),
                 directory: true
             }, function () {
-                var ewm = require('./src/ewm.js');
 
-                // 生成二维码
-                ewm(bs);
+                if (config.get('qrcode')) {
+                    var ewm = require('./src/ewm.js');
+
+                    // 生成二维码
+                    ewm(bs);
+                }
 
                 gulp.watch(config.get('cwd'), {
                     ignored: [
