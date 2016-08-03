@@ -40,6 +40,7 @@ argvOptions = {
     },
     L: {
         alias: 'livereload',
+        'default': true,
         demand: false,
         type: 'boolean',
         describe: chalk.gray('automatically reload your browser')

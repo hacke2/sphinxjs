@@ -32,7 +32,7 @@ function execute(env) {
             }, store)
             .stream
             .on('finish', function () {
-                bs && bs.reload();
+                config.get('livereload') && bs && bs.reload();
             });
         }
     ]));
