@@ -14,7 +14,7 @@ var _ = require('../util');
 var importer = require('../sass').importer;
 var fixImport = require('../sass').fixImport;
 var ext = require('../ext');
-var props = require('../props');
+// var props = require('../props');
 var Mail = require('../mail.js');
 var ifElse = require('gulp-if-else');
 
@@ -33,13 +33,12 @@ function unique(array) {
     return r;
 }
 
-function Base(path, conf, cache) {
+function Base(path, conf) {
     this._path = path;
     this._optimize = conf.optimize;
     this._cwd = conf.cwd;
     this._dest = conf.dest;
     this._lastRun = conf.lastRun;
-    this._cache = cache;
     this._sourcemap = conf.sourcemap;
     this._es6 = conf.es6;
     this.mail = new Mail();
@@ -80,9 +79,6 @@ Base.prototype = {
 
         // 编译
         stream = this.compile(stream);
-
-        // stream = stream.pipe(deps(this._cache, this.compile.bind(this)));
-
         stream = this.lang(stream);
         stream = this.postrelease(stream);
         // 拷贝副本
@@ -152,7 +148,7 @@ Base.prototype = {
             stream.add(gulp.src(this._path));
         }
 
-        stream = stream.pipe(props());
+        // stream = stream.pipe(props());
 
         return stream;
     },
@@ -171,7 +167,7 @@ Base.prototype = {
     lang: function (stream) {
         stream = stream
             .pipe(inline())
-            .pipe(embed(this._cache));
+            .pipe(embed());
         return stream;
     },
 

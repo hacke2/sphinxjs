@@ -6,7 +6,7 @@ var Store = require('./store');
 
 var store = new Store;
 
-module.exports = function (cache) {
+module.exports = function () {
     return through.obj(function (file, enc, cb) {
         if (file.isNull()) {
             this.push(file);
@@ -36,28 +36,13 @@ module.exports = function (cache) {
         };
 
         function embed(obj) {
-            var file, contents, dirname, cwd,
-                c, meta;
+            var file, contents, dirname, cwd;
 
             if (obj.piped) {
                 return;
             }
 
             file = obj.file;
-
-            if (file.sphinx) {
-                meta = file.sphinx.meta;
-                cache.add(meta.path, {
-                    deps: [],
-                    props: {
-                        path: meta.path,
-                        cwd: meta.cwd,
-                        base: meta.base
-                    }
-                });
-
-                c = cache.find(meta.path);
-            }
 
             // 非图片
             if (_.isImage(_.extname(file.path))) {
@@ -71,8 +56,7 @@ module.exports = function (cache) {
             cwd = file.cwd;
 
             contents = contents.replace(lang.reg, function (all, type, depth, url, extra) {
-                var info, obj, ret, message,
-                    meta;
+                var info, obj, ret, message;
 
                 info = _.uri(url, dirname, cwd);
                 obj = store.find(info.release);
@@ -98,10 +82,6 @@ module.exports = function (cache) {
                                         ret = JSON.stringify(ret);
                                     }
                                 }
-                                if (obj.file.sphinx) {
-                                    meta = obj.file.sphinx.meta;
-                                    c.deps.push(meta.path);
-                                }
                             } else {
                                 message = 'unable to embed non-existent file [' + url + '] in [' + file.path + ']';
                             }
@@ -118,11 +98,6 @@ module.exports = function (cache) {
                         case 'require':
                             if (info.id && info.exists) {
                                 ret = info.quote + info.id + info.quote;
-
-                                if (obj.file.sphinx) {
-                                    meta = obj.file.sphinx.meta;
-                                    c.deps.push(meta.path);
-                                }
                             } else {
                                 ret = url;
                             }

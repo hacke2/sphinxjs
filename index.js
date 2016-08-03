@@ -3,9 +3,6 @@ var gulp = require('gulp');
 var plugin = require('./src/plugin.js');
 var buildGlob = require('./src/glob.js');
 var config = require('./src/config.js');
-var Store = require('./src/store');
-
-var store = new Store;
 var bs;
 
 function execute(env) {
@@ -29,7 +26,7 @@ function execute(env) {
                 // lastRun: gulp.lastRun('release'),
                 sourcemap: config.get('sourcemap'),
                 es6: config.get('es6')
-            }, store)
+            })
             .stream
             .on('finish', function () {
                 config.get('livereload') && bs && bs.reload();
