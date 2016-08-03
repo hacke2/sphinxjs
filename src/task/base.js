@@ -58,8 +58,23 @@ Base.prototype = {
         stream = stream
             .pipe(plumber({
                 errorHandler: notify.onError(function (error) {
-                    this.mail.collectMessage(error.message);
-                    return 'Error:' + error.message;
+                    var message = '[' + error.plugin + ']',
+                        file, formatted;
+
+                    if (error.name) {
+                        message += error.name + ':';
+                    }
+
+                    formatted = error.messageFormatted || error.message;
+
+                    message += ' "' + formatted + '" ';
+
+                    if (file = (error.file || error.fileName)) {
+                        message += 'in [' + file + ']';
+                    }
+
+                    this.mail.collectMessage(message);
+                    return message;
                 }.bind(this))
             }));
 

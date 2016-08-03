@@ -41,7 +41,8 @@ function execute(env) {
                 .pipe(filter('**/*.css'))
                 .pipe(browserSync.reload({stream: true}));
             } else {
-                stream = stream.pipe(connect.reload());
+                /* stream = stream
+                .pipe(connect.reload());*/
             }
 
             return stream;
@@ -103,7 +104,7 @@ function execute(env) {
     function ct() {
         connect.server({
             root: config.get('dest'),
-            livereload: config.get('livereload'),
+            // livereload: config.get('livereload'),
             port: 3000
         });
 
