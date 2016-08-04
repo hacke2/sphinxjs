@@ -77,6 +77,12 @@ serverArgvOptions = objectAssign({
         type: 'boolean',
         'default': true,
         describe: chalk.gray('generate qrcode')
+    },
+
+    startpath: {
+        demand: false,
+        type: 'string',
+        describe: chalk.gray('open the browser window at URL + startpath')
     }
 }, argvOptions);
 

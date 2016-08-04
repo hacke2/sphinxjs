@@ -40,8 +40,12 @@ function execute(env) {
             bs = require('browser-sync').create();
             bs.init({
                 open: 'external',
-                server: config.get('dest'),
-                directory: true
+                server: {
+                    baseDir: config.get('dest'),
+                    directory: true
+                },
+                logPrefix: 'SPHINX SERVER',
+                startPath: config.get('startpath')
             }, function () {
 
                 if (config.get('qrcode')) {
