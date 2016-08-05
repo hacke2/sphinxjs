@@ -62,6 +62,10 @@ argvOptions = {
         type: 'boolean',
         describe: chalk.gray('opening es6')
     },
+    sc: {
+        type: 'string',
+        describe: chalk.gray('release as sc')
+    }
 };
 
 serverArgvOptions = objectAssign({

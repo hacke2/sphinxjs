@@ -1,16 +1,23 @@
 'use strict';
 var gulp = require('gulp');
 var plugin = require('./src/plugin.js');
-var buildGlob = require('./src/glob.js');
+var glob = require('./src/glob.js');
 var config = require('./src/config.js');
 var bs;
 
 function execute(env) {
     gulp.task('release', gulp.series([
         function (cb) {
+
             config.set('glob', null);
             config.load(env.configPath);
-            buildGlob(config.get('cwd'), config.get('dest'));
+
+            if (!config.get('sc')) {
+                glob.buildGlob(config.get('cwd'), config.get('dest'));
+            } else {
+                glob.buildScGlob(config.get('sc'), config.get('cwd'), config.get('dest'), gulp.lastRun('release'));
+            }
+
             cb();
         },
         function (cb) {
