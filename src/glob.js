@@ -95,8 +95,6 @@ function buildScGlob(target, root, dest, lastRun) {
             if (info.extname === '.html' && info.dirname.indexOf(root) === 0) {
                 var dirname = info.dirname;
 
-                // console.log(fs.lstatSync(dirname));
-
                 subpath = dirname.substring(root.length);
                 globs.push(
                     pth.join(subpath, '**')
@@ -113,15 +111,31 @@ function buildScGlob(target, root, dest, lastRun) {
                         .replace(/shortcuts/, '+(shortcuts)')
                     );
                 }
+
+                globs.push('+(symbol)/**');
             }
         }
     });
 
-    globs.push('+(js)/**');
-    globs.push('+(css)/**');
-    globs.push('+(symbol)/**');
-    globs.push('+(tmpl)/**');
-    globs.push('+(img)/**');
+    function filter(pattern) {
+        var glob = require('glob');
+        var matches = glob.sync(pattern);
+
+        if (matches.length === 0) {
+            return false;
+        }
+        return !matches.every(function (file) {
+            return fs.lstatSync(file).mtime <= lastRun;
+        });
+    }
+
+    if (filter('+(js|tmpl)/**')) {
+        globs.push('+(js|tmpl)/**');
+    }
+
+    if (filter('+(css|img)/**')) {
+        globs.push('+(css|img)/**');
+    }
 
     config.set('glob', globs);
 }
