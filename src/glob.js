@@ -70,7 +70,7 @@ function buildScGlob(target, root, dest, lastRun) {
     var contents;
     var execHtml;
     var lang;
-    var globs = [];
+    var globs = [target];
 
     target = pth.join(root, target);
 
