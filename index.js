@@ -3,6 +3,7 @@ var gulp = require('gulp');
 var plugin = require('./src/plugin.js');
 var glob = require('./src/glob.js');
 var config = require('./src/config.js');
+var ifElse = require('gulp-if-else');
 var bs;
 
 function execute(env) {
@@ -35,9 +36,9 @@ function execute(env) {
                 es6: config.get('es6')
             })
             .stream
-            .on('finish', function () {
-                config.get('livereload') && bs && bs.reload();
-            });
+            .pipe(ifElse(bs && config.get('livereload'), function () {
+                return bs.stream({match: '**/*.*'});
+            }));
         }
     ]));
 

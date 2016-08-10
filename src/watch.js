@@ -34,7 +34,6 @@ function debounce(func, wait) {
 
 function watch(glob, opts, cb) {
     var delay = 200;
-    var safePathReg = /[\\\/][_\-.\s\w]+$/i;
     var running = false;
     var queue = [];
     var watcher = require('chokidar').watch(glob, opts);
@@ -54,12 +53,6 @@ function watch(glob, opts, cb) {
 
     function onChange() {
         var args = [].slice.call(arguments);
-
-        args.forEach(function (path, i) {
-            if (!safePathReg.test(path)) {
-                args.splice(i, 1);
-            }
-        });
 
         if (args.length === 0) {
             return;
@@ -81,6 +74,8 @@ function watch(glob, opts, cb) {
         .on('unlink', fn)
         .on('add', fn)
         .on('error', function (err) {
+            running = false;
+            queue = [];
             console.log(err);
         });
 

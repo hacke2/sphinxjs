@@ -15,6 +15,7 @@ var importer = require('../sass').importer;
 var fixImport = require('../sass').fixImport;
 var ext = require('../ext');
 // var props = require('../props');
+var cached = require('../cached');
 var Mail = require('../mail.js');
 var ifElse = require('gulp-if-else');
 
@@ -201,6 +202,7 @@ Base.prototype = {
         }
 
         return stream
+            .pipe(cached())
             .pipe(gulp.dest(this._dest));
     },
 
