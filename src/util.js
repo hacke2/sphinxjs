@@ -63,6 +63,7 @@ MIME_MAP[ext.gif] = 'image/gif';
 MIME_MAP[ext.jpeg] = 'image/jpeg';
 MIME_MAP[ext.jpg] = 'image/jpg';
 MIME_MAP[ext.webp] = 'image/webp';
+MIME_MAP[ext.svg] = 'image/svg+xml';
 
 var EXT_MAP = {};
 
