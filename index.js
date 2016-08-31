@@ -45,16 +45,26 @@ function execute(env) {
     gulp.task('server', gulp.series([
         'release',
         function (cb) {
-            bs = require('browser-sync').create();
-            bs.init({
+            var opts = {
                 open: 'external',
                 server: {
                     baseDir: config.get('dest'),
                     directory: true
                 },
-                logPrefix: 'SPHINX SERVER',
-                startPath: config.get('startpath')
-            }, function () {
+                logPrefix: 'SPHINX SERVER'
+            };
+
+            if (config.get('port')) {
+                opts['port'] = Number(config.get('port'));
+                opts['ui'] = {port: (opts['port'] + 1)};
+            }
+
+            if (config.get('startpath')) {
+                opts['startPath'] = config.get('startpath');
+            }
+
+            bs = require('browser-sync').create();
+            bs.init(opts, function () {
 
                 if (config.get('qrcode')) {
                     var ewm = require('./src/ewm.js');

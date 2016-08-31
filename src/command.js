@@ -87,6 +87,12 @@ serverArgvOptions = objectAssign({
         demand: false,
         type: 'string',
         describe: chalk.gray('open the browser window at URL + startpath')
+    },
+
+    p: {
+        alias: 'port',
+        type: 'int',
+        describe: chalk.gray('server listen port')
     }
 }, argvOptions);
 
