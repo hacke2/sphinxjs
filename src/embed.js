@@ -78,7 +78,8 @@ module.exports = function () {
                                     // 文本文件必须 toString()
                                     ret = ret.toString();
                                     if (type === 'jsEmbed' &&
-                                        !_.isJsLike(info.rExtname)) {
+                                        !_.isJsLike(info.rExtname) &&
+                                        !_.isJson(info.rExtname)) {
                                         ret = JSON.stringify(ret);
                                     }
                                 }

@@ -16,5 +16,6 @@ module.exports = {
     svg: '.svg',
     es: '.es',
     jsx: '.jsx',
-    symbol: '.symbol'
+    symbol: '.symbol',
+    json: '.json'
 };

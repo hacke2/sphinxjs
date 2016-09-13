@@ -14,6 +14,7 @@ var TEXT_EXTS = [
     ext.tmpl,
     ext.tpl,
     ext.html,
+    ext.json,
     // todo 此处应该可以配置
     // symbol 设置为文本文件
     ext.symbol
@@ -43,6 +44,10 @@ var HTML_EXTS = [
 
 var JS_LIKE_EXTS = [
     ext.tmpl
+];
+
+var JSON_EXTS = [
+    ext.json
 ];
 
 var MIME_MAP = {};
@@ -115,6 +120,9 @@ _.isCss = function (extname) {
 
 _.isJsLike = function (extname) {
     return JS_LIKE_EXTS.indexOf(extname) > -1 || JS_EXTS.indexOf(extname) > -1;
+};
+_.isJson = function (extname) {
+    return JSON_EXTS.indexOf(extname) > -1;
 };
 
 _.isHtml = function (extname) {
