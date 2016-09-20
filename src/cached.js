@@ -37,7 +37,6 @@ module.exports = function () {
             return cb();
         }
     }, function (cb) {
-        require('fs').writeFile(('/Users/msy/log/' + Date.now()), JSON.stringify(cache._store));
         return cb();
     });
 };
