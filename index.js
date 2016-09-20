@@ -49,7 +49,15 @@ function execute(env) {
                 open: 'external',
                 server: {
                     baseDir: config.get('dest'),
-                    directory: true
+                    directory: true,
+                    middleware: [
+                        function (req, res, next) {
+                            res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+                            res.setHeader('Expires', '-1');
+                            res.setHeader('Pragma', 'no-cache');
+                            next();
+                        },
+                    ]
                 },
                 logPrefix: 'SPHINX SERVER'
             };
