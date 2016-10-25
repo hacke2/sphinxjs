@@ -70,8 +70,7 @@
     }
   ],
   "bin": {
-    "sphinx": "./bin/sphinx",
-    "sphinx-init": "./bin/sphinx-init"
+    "sphinx": "./bin/sphinx"
   },
   "scripts": {
     "lint": "./node_modules/eslint/bin/eslint.js .",
