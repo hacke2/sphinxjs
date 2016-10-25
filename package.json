@@ -1,7 +1,7 @@
 {
-    "name": "sphinxjs",
-    "description": "基于gulp4，借鉴fis的构建工具",
-    "version": "0.4.8",
+  "name": "sphinxjs",
+  "description": "基于gulp4，借鉴fis的构建工具",
+  "version": "0.4.9",
   "dependencies": {
     "async-done": "1.2.2",
     "babel-core": "6.18.0",
@@ -42,51 +42,52 @@
     "yargs": "6.3.0",
     "yargs-parser": "4.0.2"
   },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/smocean/sphinxjs.git"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smocean/sphinxjs.git"
+  },
+  "keywords": [
+    "gulp",
+    "fis",
+    "build system"
+  ],
+  "contributors": [
+    {
+      "name": "五仁",
+      "email": "maoshuyu@gmail.com"
     },
-    "keywords": [
-        "gulp",
-        "fis",
-        "build system"
-    ],
-    "contributors": [{
-            "name": "五仁",
-            "email": "maoshuyu@gmail.com"
-        },
-        {
-            "name": "明礼",
-            "email": "guomilo@gmail.com"
-        },
-        {
-            "name:": "雪娜",
-            "email": "835287890@qq.com"
-        },
-        {
-            "name": "兆翔",
-            "email": "zzxzzx2015@126.com"
-        }
-    ],
-    "bin": {
-        "sphinx": "./bin/sphinx",
-        "sphinx-init": "./bin/sphinx-init"
+    {
+      "name": "明礼",
+      "email": "guomilo@gmail.com"
     },
-    "scripts": {
-        "lint": "./node_modules/eslint/bin/eslint.js .",
-        "test": "./node_modules/mocha/bin/_mocha --recursive ./test",
-        "cover": "./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly  --recursive ./test/** && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
-        "prepush": "npm run lint",
-        "postpublish": "git push origin --tags",
-        "postinstall": "npm install -g sphinx-sln-sc"
+    {
+      "name:": "雪娜",
+      "email": "835287890@qq.com"
     },
-    "bugs": {
-        "web": "https://github.com/smocean/sphinxjs/issues"
-    },
-    "engines": {
-        "node": ">=0.12.0"
-    },
-    "license": "MIT",
+    {
+      "name": "兆翔",
+      "email": "zzxzzx2015@126.com"
+    }
+  ],
+  "bin": {
+    "sphinx": "./bin/sphinx",
+    "sphinx-init": "./bin/sphinx-init"
+  },
+  "scripts": {
+    "lint": "./node_modules/eslint/bin/eslint.js .",
+    "test": "./node_modules/mocha/bin/_mocha --recursive ./test",
+    "cover": "./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly  --recursive ./test/** && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
+    "prepush": "npm run lint",
+    "postpublish": "git push origin --tags",
+    "postinstall": "npm install -g sphinx-sln-sc"
+  },
+  "bugs": {
+    "web": "https://github.com/smocean/sphinxjs/issues"
+  },
+  "engines": {
+    "node": ">=0.12.0"
+  },
+  "license": "MIT",
   "devDependencies": {
     "autod": "2.5.1",
     "chai": "3.5.0",
