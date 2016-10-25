@@ -14,7 +14,7 @@ module.exports = function (browserSync) {
     var localMap = browserSync.instance.options,
         localUrl;
 
-    localUrl = localMap.getIn(['urls', 'external']);
+    localUrl = localMap && localMap.getIn(['urls', 'external']);
     if (localUrl) {
         qrcode.generate(localUrl, function (qrcode) {
             var strs = [];

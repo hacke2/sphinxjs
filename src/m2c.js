@@ -21,7 +21,7 @@ function processor(stream, config, cb) {
         });
         for (var pth in list) {
             file = list[pth];
-            content = jsm2c.parse(pth, config);
+            content = jsm2c.parse(pth, config).getContent();
 
             if (content) {
                 file.contents = new Buffer(content);

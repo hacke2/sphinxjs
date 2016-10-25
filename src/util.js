@@ -277,3 +277,21 @@ _.base64 = function (data, extname) {
     }
     return prefix + data.toString('base64');
 };
+_.mtime = function (path) {
+    var time = 0;
+
+    if (_.exists(path)) {
+        time = fs.statSync(path).mtime;
+    }
+    return time;
+};
+_.isPlainObject = function (obj) {
+    return _.is(obj, 'object') && Object.getPrototypeOf(obj) == Object.prototype;
+};
+_.isEmpty = function (obj) {
+
+    for (var key in obj) {
+        return false;
+    }
+    return true;
+};

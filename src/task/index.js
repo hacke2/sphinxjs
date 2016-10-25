@@ -1,11 +1,7 @@
 'use strict';
-var autoprefixer = require('autoprefixer');
-var tmpl = require('gulp-template');
-var postcss = require('gulp-postcss');
 var util = require('util');
 var Base = require('./base');
-var config = require('../config.js');
-var ext = require('../ext.js');
+var config = require('../configure/config.js');
 var _ = require('../util.js');
 var m2c = require('../m2c.js');
 
@@ -16,52 +12,6 @@ function Task(obj, conf) {
 util.inherits(Task, Base);
 
 Task.prototype.handler = {
-    css: {
-        compile: function (stream) {
-            return stream
-                .pipe(postcss([
-                    autoprefixer({
-                        browsers: ['Android >= 2', 'iOS >= 3']
-                    })
-                ]));
-        }
-    },
-
-    tmpl: {
-        filter: function (path) {
-            var extname = _.extname(path);
-
-            return extname === ext.tmpl;
-        },
-
-        compile: function (stream) {
-            return stream
-                .pipe(tmpl.precompile({
-                    variable: 'obj'
-                }));
-        },
-
-        optimize: function (stream) {
-            return stream;
-        }
-    },
-
-    tpl: {
-
-        filter: function (path) {
-            var extname = _.extname(path);
-
-            return extname === ext.tpl;
-        },
-
-        compile: function (stream) {
-            return stream;
-        },
-
-        optimize: function (stream) {
-            return stream;
-        }
-    },
     m2c: {
         filter: function (path) {
             var extname = _.extname(path);
@@ -70,10 +20,10 @@ Task.prototype.handler = {
         },
         postrelease: function (stream) {
 
-            if (config.get('module')) {
+            if (config.module) {
                 return stream.pipe(m2c({
-                    root: config.get('cwd'),
-                    ns: config.get('ns') || 'sm',
+                    root: this._cwd,
+                    ns: this._ns || 'sm',
                     fileBasedRoot: true
                 }));
             } else {
@@ -88,3 +38,5 @@ Task.prototype.handler = {
 Task.prototype.constructor = Task;
 
 module.exports = Task;
+
+

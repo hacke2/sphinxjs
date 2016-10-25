@@ -16,7 +16,7 @@ var fixImport = require('../sass').fixImport;
 var ext = require('../ext');
 // var props = require('../props');
 var cached = require('../cached');
-var Mail = require('../mail.js');
+var mail = require('../mail');
 var ifElse = require('gulp-if-else');
 
 // 数组去重
@@ -42,7 +42,7 @@ function Base(path, conf) {
     this._lastRun = conf.lastRun;
     this._sourcemap = conf.sourcemap;
     this._es6 = conf.es6;
-    this.mail = new Mail();
+    this.conf = conf.config || require('../configure/config.js');
 }
 
 Base.prototype = {
@@ -73,7 +73,7 @@ Base.prototype = {
                         message += 'in [' + file + ']';
                     }
 
-                    this.mail.collectMessage(message);
+                    mail.collectMessage(message);
                     return message;
                 }.bind(this))
             }));
@@ -100,7 +100,7 @@ Base.prototype = {
         }
 
         stream.on('finish', function (e) {
-            this.mail.send('【sphinx release Error】');
+            mail.send('【sphinx release Error】');
         }.bind(this));
 
         return stream;
@@ -113,6 +113,7 @@ Base.prototype = {
         if (!type) {
             return stream;
         }
+        this.handler = this.handler || {};
 
         handlers = Array.prototype.concat(
             Object.keys(Base.handler),
@@ -127,7 +128,9 @@ Base.prototype = {
                     (Base.handler[key] && Base.handler[key].filter));
 
                 return f && f.call(this, file.path);
-            }.bind(this), {restore: true});
+            }.bind(this), {
+                restore: true
+            });
 
             stream = stream.pipe(fileFilter);
             if (Base.handler[key] && Base.handler[key][type]) {
@@ -146,7 +149,11 @@ Base.prototype = {
     src: function (stream) {
         if (this._path.length > 0) {
             // stream.add(gulp.src(this._path, {since: this._lastRun}));
-            stream.add(gulp.src(this._path));
+            stream.add(gulp.src(this._path, {
+                cwd: this._cwd,
+                cwdbase: true,
+                dot: true
+            }));
         }
 
         // stream = stream.pipe(props());
@@ -182,7 +189,7 @@ Base.prototype = {
         var filterStream;
         var rename;
 
-         // flag 是否更改文件名生成 .min 文件
+        // flag 是否更改文件名生成 .min 文件
         if (flag) {
             rename = require('gulp-rename');
             filterStream = filter(function (file) {
@@ -190,7 +197,9 @@ Base.prototype = {
                     extname = _.extname(path);
 
                 return _.isJs(extname) || _.isCss(extname);
-            }, {restore: true});
+            }, {
+                restore: true
+            });
 
             stream = stream.pipe(filterStream);
 
@@ -203,11 +212,12 @@ Base.prototype = {
 
         return stream
             .pipe(cached())
-            .pipe(gulp.dest(this._dest));
+            .pipe(gulp.dest(this._dest, {
+                cwd: this._cwd
+            }));
     },
 
-    destory: function () {
-    }
+    destory: function () {}
 };
 
 // 默认处理器
@@ -252,7 +262,9 @@ Base.handler = {
                 var extname = _.extname(file.path);
 
                 return extname === ext.scss || extname === ext.sass;
-            }, {restore: true});
+            }, {
+                restore: true
+            });
 
             return stream
                 .pipe(ifElse(this._sourcemap, function () {
@@ -319,6 +331,28 @@ Base.handler = {
 
         optimize: function (stream) {
             return stream;
+        }
+    },
+    m2c: {
+        filter: function (path) {
+            var extname = _.extname(path);
+
+            return _.isJs(extname) || _.isHtml(extname);
+        },
+        postrelease: function (stream) {
+
+            if (this.conf.mod) {
+                var m2c = require('../m2c');
+
+                return stream.pipe(m2c({
+                    root: this._cwd,
+                    ns: this._ns || 'sm',
+                    fileBasedRoot: true
+                }));
+            } else {
+                return stream;
+            }
+
         }
     }
 

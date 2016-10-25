@@ -1,14 +1,15 @@
 'use strict';
-var pkg = require('./package.json');
-var config = require('./src/config.js');
+
+var config = require('./src/configure/config.js');
 var Liftoff = require('liftoff');
-var gutil = require('gulp-util');
-var gulp = require('gulp');
-var chalk = gutil.colors;
-var prettyTime = require('pretty-hrtime');
-var tasks = config.get('_');
-var yargs = require('yargs');
-var cli = new Liftoff({
+
+var showLogo = require('./logo.js');
+var argv = require('yargs-parser')(process.argv.slice(2));
+var objectAssign = require('object-assign-deep');
+var command = require('./src/configure/command.js');
+var plugin = require('./src/plugin.js');
+
+var liftoff = new Liftoff({
     name: 'sphinx',
     configName: 'sphinx-conf',
     extensions: {
@@ -17,20 +18,16 @@ var cli = new Liftoff({
     }
 });
 
-var Base = require('./src/task/base.js');
-var util = require('./src/util.js');
 var sphinx = {
-    config: {
-        get: function (key) {
-            return config.get(key);
-        }
-    },
-    Base: Base,
-    util: util
+    config: config,
+    Base: require('./src/task/base.js'),
+    util: require('./src/util.js'),
+    ext: require('./src/ext.js'),
+    lang: require('./src/lang.js'),
+    inline: require('./src/inline.js')
 };
 
 if (!global.sphinx) {
-
     Object.defineProperty(global, 'sphinx', {
         enumerable: true,
         writable: false,
@@ -39,154 +36,37 @@ if (!global.sphinx) {
     });
 }
 
-tasks.splice(1);
-if (isCommand(tasks)) {
-    cli.launch({
-        cwd: config.get('cwd'),
-        configPath: config.get('sphinxconf')
-    }, invoke);
-} else {
-    yargs.showHelp();
+// 输出版本和logo
+if (argv.version || argv.v) {
+    showLogo();
 }
+
+liftoff.launch({
+    cwd: argv.cwd,
+    configPath: argv.conf
+}, invoke);
 
 function invoke(env) {
-    if (config.get('version') && tasks.length === 0) {
-        console.log('\n\r  v' + pkg.version + '\n');
-        // version.push('\t┏┛ ┻━━━━━┛ ┻┓');
-        // version.push('\t┃           ┃');
-        // version.push('\t┃　 　━     ┃');
-        // version.push('\t┃  ┳┛   ┗┳　┃');
-        // version.push('\t┃　 　　　  ┃');
-        // version.push('\t┃     ┻　　 ┃');
-        // version.push('\t┗━┓　　┏━━━━┛');
-        // version.push('\t  ┃　　┃');
-        // version.push('\t  ┃　　┗━━━━━━━━┓');
-        // version.push('\t  ┃　　　　　　 ┣┓');
-        // version.push('\t  ┃　　　　     ┏┛');
-        // version.push('\t  ┗━┓ ┓ ┏━┳ ┓ ┏━┛');
-        // version.push('\t    ┃ ┫ ┫ ┃ ┫ ┫');
-        // version.push('\t    ┗━┻━┛ ┗━┻━┛\n\r');
-        // console.log(chalk.yellow(version.join('\n')));
-        console.log(bigFont('SPHINX', {space: '', lineStyle: -1, blockStyle: 2, colors: ['red', 'yellow', 'red', 'green', 'red']}));
-        console.log('\n');
-        process.exit(0);
-    }
+    var solution,
+        cmdConf = require('./src/configure/cmd-conf.js'),
+        slnCmdConf,
+        sln = require('./src/task/base.js'),
+        cli;
 
     // 加载配置文件
-    require('./index')(env);
 
-    gulp.on('start', function (e) {
-        if (e.name === '<anonymous>') {
-            return;
-        }
-        gutil.log('Starting', '\'' + chalk.cyan(e.name) + '\'...');
-    });
-    gulp.on('stop', function (e) {
-        var time;
-
-        if (e.name === '<anonymous>') {
-            return;
-        }
-
-        time = prettyTime(e.duration);
-
-        gutil.log(
-            'Finished', '\'' + chalk.cyan(e.name) + '\'',
-            'after', chalk.magenta(time)
-        );
-    });
-    gulp.on('error', function (e) {
-        var msg, time;
-
-        if (e.name === '<anonymous>') {
-            return;
-        }
-
-        msg = formatError(e);
-        time = prettyTime(e.duration);
-
-        gutil.log(
-            '\'' + chalk.cyan(e.name) + '\'',
-            chalk.red('errored after'),
-            chalk.magenta(time)
-        );
-        gutil.log(msg || e.error.stack);
-    });
-    process.nextTick(function () {
-        try {
-            gulp.parallel(tasks)(function (err) {
-                if (err) {
-                    process.exit(1);
-                }
-            });
-        } catch (e) {
-        };
-    });
-
-}
-
-function isCommand(tasks) {
-    var commands = yargs.getCommandInstance().getCommands();
-
-    if (tasks.length > 0) {
-        if (!commands.length || commands.length && commands.indexOf(tasks[0]) >= 0) {
-            return true;
-        }
-    } else if (yargs.argv.version || yargs.argv.help) {
-        return true;
+    config.load(env.configPath, false);
+    solution = argv.s || argv.solution || config.solution;
+    if (solution) {
+        slnCmdConf = plugin.getSlnCmd(solution) || {};
+        config.mergeCmdConf(slnCmdConf);
+        cmdConf = objectAssign(cmdConf, slnCmdConf);
+        sln = plugin.getSlnTask(solution) || sln;
     }
-    return false;
-
-}
-
-function formatError(e) {
-    if (!e.error) {
-        return e.message;
+    require('./index')(env, sln);
+    cli = command.createCLI(cmdConf);
+    config.mergeCliArgs(cli.argv);
+    if (cli.argv._.length == 0) {
+        cli.showHelp();
     }
-
-    // PluginError
-    if (typeof e.error.showStack === 'boolean') {
-        return e.error.toString();
-    }
-
-    // Normal error
-    if (e.error.stack) {
-        return e.error.stack;
-    }
-
-    // Unknown (string, number, etc.)
-    return new Error(String(e.error)).stack;
-}
-function bigFont(c, opts) {
-    var lines = [],
-        space,
-        prefix,
-        suffix,
-        bigfont = require('bigfont');
-
-    opts = opts || {};
-    space = opts.lineStyle < 0 ? ' ' : '';
-    prefix = opts.prefix || '';
-    suffix = opts.suffix || '';
-
-    c.split('').forEach(function (text, index) {
-        var colorName = Array.isArray(opts.colors) && opts.colors[index],
-            color = colorName in chalk ? chalk[colorName] : chalk['cyan'],
-            temp = bigfont.lattice(text, opts);
-
-        temp.split(/\n/).forEach(function (text, index) {
-            if (!lines[index]) {
-                lines[index] = '';
-            }
-            if (text) {
-                lines[index] += space + color(text);
-            }
-        });
-    });
-    if (prefix || suffix) {
-        lines = lines.map(function (line) {
-            return prefix + line + suffix;
-        });
-    }
-    return lines.join('\n');
 }

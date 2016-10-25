@@ -2,42 +2,100 @@
 var gulp = require('gulp');
 var plugin = require('./src/plugin.js');
 var glob = require('./src/glob.js');
-var config = require('./src/config.js');
+var gutil = require('gulp-util');
+var pth = require('path');
+var chalk = gutil.colors;
+var prettyTime = require('pretty-hrtime');
+var config = require('./src/configure/config.js');
 var ifElse = require('gulp-if-else');
+var pathIsAbsolute = require('path-is-absolute');
 var bs;
 
-function execute(env) {
+function execute(env, sln) {
+    gulp.on('start', function (e) {
+        if (e.name === '<anonymous>') {
+            return;
+        }
+        gutil.log('Starting', '\'' + chalk.cyan(e.name) + '\'...');
+    });
+    gulp.on('stop', function (e) {
+        var time;
+
+        if (e.name === '<anonymous>') {
+            return;
+        }
+
+        time = prettyTime(e.duration);
+
+        gutil.log(
+            'Finished', '\'' + chalk.cyan(e.name) + '\'',
+            'after', chalk.magenta(time)
+        );
+    });
+    gulp.on('error', function (e) {
+        var msg, time;
+
+        if (e.name === '<anonymous>') {
+            return;
+        }
+
+        msg = formatError(e);
+        time = prettyTime(e.duration);
+
+        gutil.log(
+            '\'' + chalk.cyan(e.name) + '\'',
+            chalk.red('errored after'),
+            chalk.magenta(time)
+        );
+        gutil.log(msg || e.error.stack);
+        process.exit(0);
+    });
+
     gulp.task('release', gulp.series([
         function (cb) {
-
-            config.set('glob', null);
             config.load(env.configPath);
-
-            if (!config.get('sc')) {
-                glob.buildGlob(config.get('cwd'), config.get('dest'));
-            } else {
-                glob.buildScGlob(config.get('sc'), config.get('cwd'), config.get('dest'), gulp.lastRun('release'));
-            }
-
             cb();
         },
         function (cb) {
-            var glob = config.get('glob'),
-                Solution;
+            var glob = config.glob,
+                Solution = sln,
+                globHandler = function () {
+                    var dest = config.dest,
+                        cwd = config.cwd,
 
-            Solution = plugin.loadSolution();
+                        dGlob;
 
+                    dest = pth.resolve(cwd, dest);
+                    if (dest.indexOf(cwd) == 0) {
+                        dest = pth.relative(cwd, dest);
+                    } else {
+                        return;
+                    }
+                    dGlob = '!(' + dest + ')/**';
+                    if (Array.isArray(glob)) {
+                        glob.push(dGlob);
+                    } else {
+                        glob = [glob, dGlob];
+                    }
+                    config.glob = glob;
+
+                };
+
+            globHandler();
+            // Solution = plugin.loadSolution();
             return new Solution(glob, {
-                cwd: config.get('cwd'),
-                dest: config.get('dest'),
-                optimize: config.get('optimize'),
+                cwd: config.cwd,
+                dest: config.dest,
+                optimize: config.optimize,
                 // lastRun: gulp.lastRun('release'),
-                sourcemap: config.get('sourcemap'),
-                es6: config.get('es6')
+                sourcemap: config.sourcemap
+                    // es6: config.get('es6')
             })
             .stream
-            .pipe(ifElse(bs && config.get('livereload'), function () {
-                return bs.stream({match: '**/*.*'});
+            .pipe(ifElse(bs && config.livereload, function () {
+                return bs.stream({
+                    match: '**/*.*'
+                });
             }));
         }
     ]));
@@ -46,45 +104,51 @@ function execute(env) {
         'release',
         function (cb) {
             var opts = {
-                open: 'external',
-                server: {
-                    baseDir: config.get('dest'),
-                    directory: true,
-                    middleware: [
-                        function (req, res, next) {
-                            res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
-                            res.setHeader('Expires', '-1');
-                            res.setHeader('Pragma', 'no-cache');
-                            next();
-                        },
-                    ]
+                    open: 'external',
+                    server: {
+                        baseDir: config.dest,
+                        directory: true,
+                        middleware: [
+                            function (req, res, next) {
+                                res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+                                res.setHeader('Expires', '-1');
+                                res.setHeader('Pragma', 'no-cache');
+                                next();
+                            },
+                        ]
+                    },
+                    logPrefix: 'SPHINX SERVER'
                 },
-                logPrefix: 'SPHINX SERVER'
-            };
+                port, startpath;
 
-            if (config.get('port')) {
-                opts['port'] = Number(config.get('port'));
-                opts['ui'] = {port: (opts['port'] + 1)};
+            if ((port = config.port)) {
+                opts['port'] = Number(port);
+                opts['ui'] = {
+                    port: port + 1
+                };
             }
 
-            if (config.get('startpath')) {
-                opts['startPath'] = config.get('startpath');
+            if ((startpath = config.startpath)) {
+                opts['startPath'] = startpath;
             }
 
             bs = require('browser-sync').create();
+
+            //console.dir(bs.instance.utils.getHostIp());
+
             bs.init(opts, function () {
 
-                if (config.get('qrcode')) {
+                if (config.qrcode) {
                     var ewm = require('./src/ewm.js');
 
                     // 生成二维码
                     ewm(bs);
                 }
 
-                gulp.watch(config.get('cwd'), {
+                gulp.watch(config.cwd, {
                     ignored: [
                         /[\/\\](\.)/,
-                        require('path').join(config.get('cwd'), config.get('dest'))
+                        require('path').join(config.cwd, config.dest)
                     ],
                     ignoreInitial: true
                 }, gulp.task('release'));
@@ -93,5 +157,24 @@ function execute(env) {
             cb();
         }
     ]));
+}
+
+function formatError(e) {
+    if (!e.error) {
+        return e.message;
+    }
+
+    // PluginError
+    if (typeof e.error.showStack === 'boolean') {
+        return e.error.toString();
+    }
+
+    // Normal error
+    if (e.error.stack) {
+        return e.error.stack;
+    }
+
+    // Unknown (string, number, etc.)
+    return new Error(String(e.error)).stack;
 }
 module.exports = execute;

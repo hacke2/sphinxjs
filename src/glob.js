@@ -5,66 +5,8 @@
 'use strict';
 
 var fs = require('fs');
-var config = require('./config.js');
 var pth = require('path');
 var _ = require('./util');
-
-function formatPath(path) {
-    var rPath = path.replace(/[\\\/]/g, '/');
-
-    return rPath;
-}
-
-function buildGlob(root, dest, deep) {
-    var globs = [],
-        files;
-
-    if (config.get('glob')) {
-        return;
-    }
-
-    dest = formatPath(pth.relative(root, dest || config.get('dest'))).split('/')[0];
-    deep = deep || 2;
-    globs.push('**.**');
-    (function getBolbs(dir, curDeep) {
-        files = fs.readdirSync(dir);
-
-        files.forEach(function (name) {
-            var path,
-                stat,
-                rPath,
-                glob;
-
-            if (name.indexOf('.') == 0 || (curDeep == 1 && dest == name)) {
-                return;
-            }
-
-            path = dir + '/' + name;
-            stat = fs.statSync(path);
-            rPath = formatPath(pth.relative(root, path));
-            if (rPath.indexOf('/') > 0) {
-                rPath = '+(' + rPath.replace(/\//, ')/');
-            } else {
-                rPath = '+(' + rPath + ')';
-            }
-            if (stat.isDirectory()) {
-                if (curDeep < deep) {
-                    getBolbs(path, curDeep + 1);
-                } else {
-                    glob = rPath + '/**';
-                    glob && globs.push(glob, glob + '.**');
-                }
-
-            } else {
-                glob = rPath;
-                glob && globs.push(glob);
-            }
-
-        });
-    }(root, 1));
-
-    config.set('glob', globs);
-}
 
 function buildScGlob(target, root, dest, lastRun) {
     var contents;
@@ -75,8 +17,7 @@ function buildScGlob(target, root, dest, lastRun) {
     target = pth.join(root, target);
 
     if (!_.exists(target)) {
-        buildGlob(root, dest);
-        return;
+        return '**';
     }
 
     execHtml = require('./inline').execHtml;
@@ -96,6 +37,7 @@ function buildScGlob(target, root, dest, lastRun) {
                 var dirname = info.dirname;
 
                 subpath = dirname.substring(root.length);
+                console.log(subpath);
                 globs.push(
                     pth.join(subpath, '**')
                     .replace(/^\//, '')
@@ -137,10 +79,9 @@ function buildScGlob(target, root, dest, lastRun) {
         globs.push('+(css|img)/**');
     }
 
-    config.set('glob', globs);
+    return globs;
+
 }
 module.exports = {
-    buildGlob: buildGlob,
     buildScGlob: buildScGlob
 };
-
