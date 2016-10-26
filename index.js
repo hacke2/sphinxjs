@@ -71,7 +71,9 @@ function execute(env, sln) {
                     }
                     dGlob = '!(' + dest + ')/**';
                     if (Array.isArray(glob)) {
-                        glob.push(dGlob);
+                        if (glob.indexOf(dGlob) == -1) {
+                            glob.push(dGlob);
+                        }
                     } else {
                         glob = [glob, dGlob];
                     }
