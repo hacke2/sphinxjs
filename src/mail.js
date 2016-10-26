@@ -16,12 +16,13 @@ module.exports = {
     },
     send: function (opts, callback) {
         var smtp, options, enabled, transport, message,
-            mailConf = config.mail;
+            mailConf = config.mail || {};
 
         if (!nodeMail) {
             nodeMail = require('nodemailer');
         }
         opts = opts || {};
+
         smtp = opts.smtp || mailConf.smtp || {};
         options = opts.options || mailConf.options || {};
         enabled = opts.enabled || mailConf.enabled;
