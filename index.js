@@ -1,14 +1,12 @@
 'use strict';
 var gulp = require('gulp');
-var plugin = require('./src/plugin.js');
-var glob = require('./src/glob.js');
 var gutil = require('gulp-util');
 var pth = require('path');
 var chalk = gutil.colors;
 var prettyTime = require('pretty-hrtime');
 var config = require('./src/configure/config.js');
 var ifElse = require('gulp-if-else');
-var pathIsAbsolute = require('path-is-absolute');
+
 var bs;
 
 function execute(env, sln) {
@@ -134,7 +132,7 @@ function execute(env, sln) {
 
             bs = require('browser-sync').create();
 
-            //console.dir(bs.instance.utils.getHostIp());
+            // console.dir(bs.instance.utils.getHostIp());
 
             bs.init(opts, function () {
 

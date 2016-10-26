@@ -1,7 +1,5 @@
 'use strict';
 var objectAssign = require('object-assign');
-
-
 // var cache = {};
 var release = {
     describe: 'build and deploy your project',
@@ -93,7 +91,6 @@ server.options = objectAssign({
 var cmdConf = {
     release: release,
     server: server
-        //init: init
 };
 
 module.exports = cmdConf;

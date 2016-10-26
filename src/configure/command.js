@@ -9,7 +9,6 @@ var yargs = require('yargs'),
 function createCommand(command, describe, options, usage, handler, color) {
     var name, opts = objectAssign({}, options);
 
-
     if (!_.is(command, 'string') || !_.is(describe, 'string') || !command || !describe) {
         throw new Error('command and describe parameter must be string and must not be empty');
     }
@@ -106,15 +105,12 @@ function createCLI(opts) {
         });
     });
 
-
     return _yargs
         .help('h')
         .alias('h', 'help')
         .describe('help', chalk.gray('show help infomation'))
         .locale('en');
 }
-
-
 
 module.exports = {
     createCmd: createCommand,

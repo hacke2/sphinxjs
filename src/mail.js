@@ -8,8 +8,6 @@ var nodeMail;
 var gutil = require('gulp-util');
 var config = require('./configure/config.js');
 var _ = require('./util.js');
-
-
 var messageList = [];
 
 module.exports = {

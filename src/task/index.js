@@ -38,5 +38,3 @@ Task.prototype.handler = {
 Task.prototype.constructor = Task;
 
 module.exports = Task;
-
-

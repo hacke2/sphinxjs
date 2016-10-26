@@ -15,15 +15,15 @@ var cache = {};
 
 var model = {};
 
-Object.keys(cmdConf).forEach(function(key) {
+Object.keys(cmdConf).forEach(function (key) {
     initConf = objectAssign(initConf, cmdConf[key].options);
 });
 
 config = {
-    init: function(conf) {
+    init: function (conf) {
         initConf = conf;
     },
-    load: function(path, missing) {
+    load: function (path, missing) {
         var conf,
             lastTime;
 
