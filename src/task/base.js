@@ -151,8 +151,7 @@ Base.prototype = {
             // stream.add(gulp.src(this._path, {since: this._lastRun}));
             stream.add(gulp.src(this._path, {
                 cwd: this._cwd,
-                cwdbase: true,
-                dot: true
+                cwdbase: true
             }));
         }
 
