@@ -223,7 +223,7 @@ _.uri = function (filepath, dirname, cwd) {
             // 绝对路径
             if (filepath[0] === '/') {
                 filepath = [cwd, filepath].join('/');
-            // 相对路径
+                // 相对路径
             } else if (dirname) {
                 filepath = [dirname, filepath].join('/');
             }

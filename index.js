@@ -1,5 +1,5 @@
 'use strict';
-var gulp = require('gulp');
+var gulp = require('./gulp');
 var gutil = require('gulp-util');
 var pth = require('path');
 var chalk = gutil.colors;

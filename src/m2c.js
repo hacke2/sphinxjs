@@ -68,7 +68,6 @@ module.exports = function (config) {
                 file.contents = Buffer.concat(chunks);
                 list[file.path] = file;
                 cb();
-
             });
         }
         if (file.isBuffer()) {
