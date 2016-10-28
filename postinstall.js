@@ -1,15 +1,26 @@
 'use strict';
 
 var spawn = require('cross-spawn');
+var path = require('path');
+var fs = require('fs');
+var nodePath = process.env['_'];
 
-try {
-    spawn('npm', ['install', '-g', 'sphinx-sln-sc'], {
-        stdio: 'inherit'
-    }).on('error', function (error) {
+if (!fs.existsSync(path.join(nodePath, '../../lib/node_modules/sphinx-sln-sc')) && !fs.existsSync(path.join(nodePath, '../sp-sc'))) {
+    execNpm('install');
+} else {
+    execNpm('update');
+}
 
-    }).on('close', function () {
+function execNpm(type) {
+    try {
+        spawn('npm', [type, '-g', 'sphinx-sln-sc'], {
+            stdio: 'inherit'
+        }).on('error', function (error) {
 
-    });
-} catch (e) {
+        }).on('close', function () {
 
+        });
+    } catch (e) {
+
+    }
 }

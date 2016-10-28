@@ -50,4 +50,5 @@ Gulp.prototype.watch = function (glob, opt, task) {
 Gulp.prototype.Gulp = Gulp;
 
 var inst = new Gulp();
+
 module.exports = inst;
