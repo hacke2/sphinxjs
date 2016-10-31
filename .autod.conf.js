@@ -1,7 +1,7 @@
 module.exports = {
     write: true,
     keep: [
-        'gulp',
-        'bigfont'
+        'bigfont',
+        'plugin-extend'
     ]
 };
