@@ -10,12 +10,6 @@ var release = {
             describe: 'to compile the file glob',
             'default': '**'
         },
-        mod: {
-            alias: 'm',
-            demand: false,
-            type: 'boolean',
-            describe: 'enable modular'
-        },
         dest: {
             alias: 'd',
             demand: false,
