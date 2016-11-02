@@ -54,8 +54,9 @@ Base.prototype = {
 
         // 读取文件
         stream = this.src(stream);
-        // 错误处理
-        stream = stream
+
+        if (this.conf.error) {
+            stream = stream
             .pipe(plumber({
                 errorHandler: notify.onError(function (error) {
                     var message = '[' + error.plugin + ']',
@@ -77,6 +78,7 @@ Base.prototype = {
                     return message;
                 }.bind(this))
             }));
+        }
 
         // 编译
         stream = this.compile(stream);

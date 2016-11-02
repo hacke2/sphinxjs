@@ -46,7 +46,7 @@ function execute(env, sln) {
             chalk.magenta(time)
         );
         gutil.log(msg || e.error.stack);
-        process.exit(0);
+        process.exit(1);
     });
 
     gulp.task('release', gulp.series([

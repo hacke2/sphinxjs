@@ -83,7 +83,7 @@ function createCLI(opts) {
             v: {
                 alias: 'version',
                 demand: false,
-                describe: chalk.gray('output the version number')
+                describe: chalk.gray('显示版本号')
             }
         })
         .usage(chalk.bold('\nUsage:') + ' $0 ' + chalk.blue('<command>'));
@@ -108,8 +108,8 @@ function createCLI(opts) {
     return _yargs
         .help('h')
         .alias('h', 'help')
-        .describe('help', chalk.gray('show help infomation'))
-        .locale('en');
+        .describe('help', chalk.gray('显示帮助'))
+        .locale('zh_CN');
 }
 
 module.exports = {

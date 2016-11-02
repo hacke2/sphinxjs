@@ -2,53 +2,53 @@
 var objectAssign = require('object-assign');
 // var cache = {};
 var release = {
-    describe: 'build and deploy your project',
+    describe: '编译发布项目',
     options: {
         glob: {
             alias: 'g',
             type: 'array',
-            describe: 'to compile the file glob',
+            describe: '使用glob配置要编译的文件',
             'default': '**'
         },
         mod: {
             alias: 'm',
             demand: false,
             type: 'boolean',
-            describe: 'enable modular'
+            describe: '启用模块化，编译使用COMMONJS规范的JS'
         },
         dest: {
             alias: 'd',
             demand: false,
             type: 'string',
-            describe: 'release output destination',
+            describe: '编译输出目录',
             'default': 'output'
         },
         optimize: {
             alias: 'o',
             demand: false,
             type: 'boolean',
-            describe: 'with optimizing'
+            describe: '启用压缩'
         },
         solution: {
             alias: 's',
             demand: false,
             type: 'string',
-            describe: 'mount solution'
+            describe: '指定使用的解决方案'
         },
         conf: {
             type: 'string',
-            describe: 'manually set path of sphinxconf.js or sphinxconf.json',
+            describe: '指定配置文件的路径',
             inConfFile: false
         },
         cwd: {
             type: 'string',
-            describe: 'set project root',
+            describe: '指定要编译项目的路径',
             'default': process.cwd(),
             inConfFile: false
         },
         namespace: {
             type: 'string',
-            describe: 'Specifies the namespace of the module',
+            describe: '指定模块化编译时，全局namespace. 只在启用模块化时有效',
             'default': 'ns'
         }
 
@@ -57,7 +57,7 @@ var release = {
 };
 
 var server = {
-    describe: 'launch web server',
+    describe: '编译发布项目，并启用web server',
     options: {
 
     },
@@ -69,22 +69,22 @@ server.options = objectAssign({
         alias: 'L',
         type: 'boolean',
         demand: false,
-        describe: 'automatically reload your browser',
+        describe: '启用livereload，自动刷新浏览器',
         'default': true
     },
     qrcode: {
         type: 'boolean',
-        describe: 'generate qrcode'
+        describe: '生成URL二维码'
     },
     startpath: {
         demand: false,
         type: 'string',
-        describe: 'open the browser window at URL + startpath'
+        describe: '指定打开浏览器时的相对路径'
     },
     port: {
         alias: 'p',
         type: 'number',
-        describe: 'server listen port'
+        describe: 'web server的端口'
     }
 }, release.options);
 
