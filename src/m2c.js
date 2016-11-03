@@ -147,6 +147,7 @@ var util = {
     },
     buildId: function (src) {
         var basename = pth.basename(src);
+
         return basename.replace(/[:\/\\.-]+/g, '_') + this.md5(src, 7);
     },
 
@@ -188,8 +189,6 @@ module.exports = function (opts) {
         isWrap, compress;
 
     opts = opts || {};
-
-
     if (!pathIsAbsolute(opts.src)) {
         error('src must be absolute path');
     }
