@@ -8,6 +8,7 @@ var argv = require('yargs-parser')(process.argv.slice(2));
 var objectAssign = require('object-assign-deep');
 var command = require('./src/configure/command.js');
 var plugin = require('./src/plugin.js');
+var Cache = require('./src/cache/cache.js');
 
 var liftoff = new Liftoff({
     name: 'sphinx',
@@ -39,6 +40,13 @@ if (!global.sphinx) {
 // 输出版本和logo
 if (argv.version || argv.v) {
     showLogo();
+}
+console.log(argv);
+
+if (argv.clean || argv.c) {
+    console.log(1);
+    Cache.clean();
+    process.exit(0);
 }
 
 liftoff.launch({

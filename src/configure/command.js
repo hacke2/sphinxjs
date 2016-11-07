@@ -35,7 +35,7 @@ function createCommand(command, describe, options, usage, handler, color) {
                 .options(opts || {})
                 .usage(usage)
                 .help('h')
-                .describe('h', chalk.gray('show help information'));
+                .describe('h', chalk.gray('显示帮助文档'));
         },
         handler: function (argv) {
             if (_.is(handler, 'function')) {
@@ -83,7 +83,11 @@ function createCLI(opts) {
             v: {
                 alias: 'version',
                 demand: false,
-                describe: chalk.gray('output the version number')
+                describe: chalk.gray('显示版本号')
+            },
+            c: {
+                alias: 'clean',
+                describe: chalk.gray('清除缓存')
             }
         })
         .usage(chalk.bold('\nUsage:') + ' $0 ' + chalk.blue('<command>'));
@@ -108,7 +112,7 @@ function createCLI(opts) {
     return _yargs
         .help('h')
         .alias('h', 'help')
-        .describe('help', chalk.gray('show help infomation'))
+        .describe('help', chalk.gray('显示帮助文档'))
         .locale('en');
 }
 
