@@ -1,11 +1,12 @@
 'use strict';
 var gulp = require('./gulp');
 var gutil = require('gulp-util');
-var pth = require('path');
+var path = require('path');
 var chalk = gutil.colors;
 var prettyTime = require('pretty-hrtime');
 var config = require('./src/configure/config.js');
 var ifElse = require('gulp-if-else');
+var fs = require('fs');
 
 var bs;
 
@@ -63,9 +64,9 @@ function execute(env, sln) {
 
                         dGlob;
 
-                    dest = pth.resolve(cwd, dest);
+                    dest = path.resolve(cwd, dest);
                     if (dest.indexOf(cwd) == 0) {
-                        dest = pth.relative(cwd, dest);
+                        dest = path.relative(cwd, dest);
                     } else {
                         return;
                     }
@@ -103,6 +104,9 @@ function execute(env, sln) {
     gulp.task('server', gulp.series([
         'release',
         function (cb) {
+            var cwd = process.cwd();
+            var routePath = path.join(cwd, 'route.js');
+
             var opts = {
                     open: 'external',
                     server: {
@@ -114,12 +118,26 @@ function execute(env, sln) {
                                 res.setHeader('Expires', '-1');
                                 res.setHeader('Pragma', 'no-cache');
                                 next();
-                            },
+                            }
                         ]
                     },
                     logPrefix: 'SPHINX SERVER'
                 },
                 port, startpath;
+
+            if (fs.existsSync(path.join(cwd, 'route.js'))) {
+                var render = require('connect-render');
+                var urlrouter = require('urlrouter');
+                var ejs = require('ejs');
+
+                opts.server.middleware = opts.server.middleware.concat([
+                    render({
+                        root: cwd,
+                        layout: false
+                    }),
+                    urlrouter(require(routePath))
+                ]);
+            }
 
             if ((port = config.port)) {
                 opts['port'] = Number(port);
