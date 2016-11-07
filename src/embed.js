@@ -180,6 +180,7 @@ module.exports = function () {
             function recursion(file, isCache, map) {
                 var subpath = file.relative,
                     deps;
+
                 if (!isCache) {
                     map = map || [];
                     if (file.deps) {
@@ -265,4 +266,3 @@ module.exports = function () {
         return cb();
     });
 };
-

@@ -44,7 +44,6 @@ function parseHtml(file) {
                 nContent = lang.depsEmbed.wrap(file.path + count),
                 ret;
 
-
             count++;
 
             ret = m2c({
@@ -63,8 +62,6 @@ function parseHtml(file) {
             return nContent;
 
         });
-
-
         file.contents = new Buffer(contents);
         file.deps = deps;
         file.depsOrder = depsOrder;
@@ -127,11 +124,7 @@ module.exports = function () {
                 return cb(new gutil.PluginError('mod', e.message));
             }
         }
-
-
         this.push(file);
         return cb();
-
-
     });
 };

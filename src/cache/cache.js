@@ -69,7 +69,7 @@ function Cache(path, mtime, optimize) {
     this.depsOrder = {};
     this.requires = [];
     this.version = pkg.version;
-    //this.cacheFile = pth.join(cacheDir, basename + '-content-' + hash + '.tmp');
+    // this.cacheFile = pth.join(cacheDir, basename + '-content-' + hash + '.tmp');
     this.cacheInfo = pth.join(cacheDir, basename + '-config-' + hash + '.json');
     this.hasChange = false;
     this.enable = false;
@@ -244,7 +244,7 @@ Cache.prototype = {
 Cache.getCacheDir = getCacheDir;
 Cache.clean = function (func) {
     var dir = pth.resolve(getCacheDir(), '..');
-    console.log(dir);
+
     if (typeof func !== 'function') {
         rimraf.sync(dir);
     } else {

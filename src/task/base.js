@@ -95,7 +95,7 @@ Base.prototype = {
         stream = this.compile(stream);
 
         stream = this.lang(stream).pipe((require('through2').obj(function (file, enc, cb) {
-            //console.log(file.path);
+            // console.log(file.path);
             cb(null, file);
         })));
         stream = this.postrelease(stream);

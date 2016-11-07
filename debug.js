@@ -104,8 +104,3 @@
 //     return fs.createReadStream('./changelog.md');
 // }).pipe(stripBomStream());
 // console.log(t.contents.toString());
-
-
-
-
-

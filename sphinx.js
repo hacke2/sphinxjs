@@ -41,7 +41,6 @@ if (!global.sphinx) {
 if (argv.version || argv.v) {
     showLogo();
 }
-console.log(argv);
 
 if (argv.clean || argv.c) {
     console.log(1);
