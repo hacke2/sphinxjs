@@ -104,7 +104,10 @@ function execute(env, sln) {
     gulp.task('server', gulp.series([
         'release',
         function (cb) {
-            var cwd = process.cwd();
+            var render = require('connect-render');
+            var urlrouter = require('urlrouter');
+            var ejs = require('ejs');
+            var cwd = config.cwd;
             var routePath = path.join(cwd, 'route.js');
 
             var opts = {
@@ -118,26 +121,28 @@ function execute(env, sln) {
                                 res.setHeader('Expires', '-1');
                                 res.setHeader('Pragma', 'no-cache');
                                 next();
-                            }
+                            },
+                            render({
+                                root: cwd,
+                                layout: false
+                            }),
+                            urlrouter(function (app) {
+                                app.get('*', function (req, res, next) {
+                                    var url = req.url;
+
+                                    // 说明是.html后缀
+                                    if (url.indexOf('.html') === (url.length - 5) && fs.existsSync(path.join(cwd, url))) {
+                                        res.render(url);
+                                    } else {
+                                        next();
+                                    }
+                                });
+                            })
                         ]
                     },
                     logPrefix: 'SPHINX SERVER'
                 },
                 port, startpath;
-
-            if (fs.existsSync(path.join(cwd, 'route.js'))) {
-                var render = require('connect-render');
-                var urlrouter = require('urlrouter');
-                var ejs = require('ejs');
-
-                opts.server.middleware = opts.server.middleware.concat([
-                    render({
-                        root: cwd,
-                        layout: false
-                    }),
-                    urlrouter(require(routePath))
-                ]);
-            }
 
             if ((port = config.port)) {
                 opts['port'] = Number(port);
