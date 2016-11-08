@@ -7,6 +7,10 @@ var prettyTime = require('pretty-hrtime');
 var config = require('./src/configure/config.js');
 var ifElse = require('gulp-if-else');
 var fs = require('fs');
+var nunjucks = require('nunjucks');
+var env = new nunjucks.configure(config.cwd);
+
+env.addExtension('ComponentExtension', require('nunjucks-component-extension'));
 
 var bs;
 
@@ -104,10 +108,6 @@ function execute(env, sln) {
     gulp.task('server', gulp.series([
         'release',
         function (cb) {
-            var render = require('connect-render');
-            var ejs = require('ejs');
-            var cwd = config.cwd;
-            var routePath = path.join(cwd, 'route.js');
 
             var opts = {
                     open: 'external',
@@ -121,16 +121,30 @@ function execute(env, sln) {
                                 res.setHeader('Pragma', 'no-cache');
                                 next();
                             },
-                            render({
-                                root: cwd,
-                                layout: false
-                            }),
                             function (req, res, next) {
                                 var url = req.url;
+                                var filePath = path.join(config.cwd, url);
 
                                 // 说明是.html后缀
-                                if (url.indexOf('.html') === (url.length - 5) && fs.existsSync(path.join(cwd, url))) {
-                                    res.render(url);
+                                if (url.indexOf('.html') === (url.length - 5)) {
+
+                                    render(filePath).then(function (str) {
+                                        var buf = new Buffer(str);
+
+                                        res.charset = res.charset || 'utf-8';
+                                        res.setHeader('Content-Type', res.getHeader('Content-Type') || 'text/html');
+                                        res.setHeader('Content-Length', buf.length);
+                                        res.end(buf);
+                                    }).catch(function (e) {
+                                        if (e) {
+                                            res.writeHead(500, {'Content-Type': 'text/plain'});
+                                            res.end(e);
+                                        } else {
+                                            res.writeHead(404, {'Content-Type': 'text/plain'});
+                                            res.end('404 error! File not found.');
+                                        }
+                                    });
+
                                 } else {
                                     next();
                                 }
@@ -197,4 +211,24 @@ function formatError(e) {
     // Unknown (string, number, etc.)
     return new Error(String(e.error)).stack;
 }
+
+function render(filePath) {
+    return new Promise(function (resolve, reject) {
+        fs.exists(filePath, function (exists) {
+            if (exists) {
+                nunjucks.render(filePath, function (err, str) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(str);
+                    }
+                });
+            } else {
+                reject();
+            }
+
+        });
+    });
+}
+
 module.exports = execute;
