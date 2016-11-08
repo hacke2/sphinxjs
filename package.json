@@ -10,6 +10,7 @@
     "chokidar": "1.6.1",
     "connect-render": "^0.4.1",
     "cross-spawn": "5.0.0",
+    "ejs": "^2.5.2",
     "glob": "7.1.1",
     "glob-watcher": "3.0.0",
     "gulp": "3.9.1",
