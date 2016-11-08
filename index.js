@@ -105,7 +105,6 @@ function execute(env, sln) {
         'release',
         function (cb) {
             var render = require('connect-render');
-            var urlrouter = require('urlrouter');
             var ejs = require('ejs');
             var cwd = config.cwd;
             var routePath = path.join(cwd, 'route.js');
@@ -126,18 +125,16 @@ function execute(env, sln) {
                                 root: cwd,
                                 layout: false
                             }),
-                            urlrouter(function (app) {
-                                app.get('*', function (req, res, next) {
-                                    var url = req.url;
+                            function (req, res, next) {
+                                var url = req.url;
 
-                                    // 说明是.html后缀
-                                    if (url.indexOf('.html') === (url.length - 5) && fs.existsSync(path.join(cwd, url))) {
-                                        res.render(url);
-                                    } else {
-                                        next();
-                                    }
-                                });
-                            })
+                                // 说明是.html后缀
+                                if (url.indexOf('.html') === (url.length - 5) && fs.existsSync(path.join(cwd, url))) {
+                                    res.render(url);
+                                } else {
+                                    next();
+                                }
+                            }
                         ]
                     },
                     logPrefix: 'SPHINX SERVER'
