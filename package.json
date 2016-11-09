@@ -28,7 +28,7 @@
     "merge-stream": "1.0.0",
     "nodemailer": "2.6.4",
     "nunjucks": "^3.0.0",
-    "nunjucks-component-extension": "0.0.1",
+    "nunjucks-component-extension": "^0.0.2",
     "object-assign": "4.1.0",
     "object-assign-deep": "0.0.4",
     "plugin-extend": "*",
