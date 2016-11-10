@@ -3,8 +3,5 @@
     "extends": "sm/node-config",
     "env": {
         "node": true
-    },
-    "rules": {
-		"new-cap": 1
-	}
+    }
 }
